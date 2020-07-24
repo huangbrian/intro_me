@@ -9,21 +9,19 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var email: String = ""
-    @State var user: String = ""
-    @State var pass: String = ""
+    @EnvironmentObject var data: UserData
     @State var page: String = ""
     
     @ViewBuilder
     var body: some View {
         if(page == "signup") {
-            SignupView(email: self.$email, user: self.$user, pass: self.$pass, page: self.$page)
+            SignupView(page: self.$page)
         } else if(page == "newuser") {
             NewUserView()
         } else if(page == "home") {
             HomeView()
         } else {
-            Start(email: self.$email, user: self.$user, pass: self.$pass, page: self.$page)
+            Start(page: self.$page)
         }
     }
 }
@@ -48,9 +46,7 @@ struct GradientBackgroundStyle: ButtonStyle {
 }
 
 struct Start: View {
-    @Binding var email: String
-    @Binding var user: String
-    @Binding var pass: String
+    @EnvironmentObject var data: UserData
     @Binding var page: String
     var body: some View {
         VStack {
@@ -61,10 +57,10 @@ struct Start: View {
             Spacer()
             HStack {
                 VStack {
-                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $user)
+                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
-                    SecureField("Password", text: $pass)
+                    SecureField("Password", text: $data.pass)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
@@ -86,9 +82,7 @@ struct Start: View {
 }
 
 struct SignupView: View {
-    @Binding var email: String
-    @Binding var user: String
-    @Binding var pass: String
+    @EnvironmentObject var data: UserData
     @Binding var page: String
     @State private var passConfirm: String = ""
     var body: some View {
@@ -99,13 +93,13 @@ struct SignupView: View {
             Spacer()
             HStack {
                 VStack {
-                    TextField("Email", text: $email)
+                    TextField("Email", text: $data.email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
-                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $user)
+                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
-                    SecureField("Password", text: $pass)
+                    SecureField("Password", text: $data.pass)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     SecureField("Password", text: $passConfirm)
@@ -113,7 +107,7 @@ struct SignupView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
                         Button(action: {
-                            if(self.pass == self.passConfirm) {
+                            if(self.data.pass == self.passConfirm) {
                                 self.page = "newuser"
                             }
                         }) {
