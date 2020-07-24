@@ -9,13 +9,137 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var email: String = ""
+    @State var user: String = ""
+    @State var pass: String = ""
+    @State var page: String = ""
+    
+    @ViewBuilder
     var body: some View {
-        Text("Hello, World!")
+        if(page == "signup") {
+            SignupView(email: self.$email, user: self.$user, pass: self.$pass, page: self.$page)
+        } else if(page == "newuser") {
+            NewUserView()
+        } else if(page == "home") {
+            HomeView()
+        } else {
+            Start(email: self.$email, user: self.$user, pass: self.$pass, page: self.$page)
+        }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct GradientBackgroundStyle: ButtonStyle {
+ 
+    func makeBody(configuration: Self.Configuration) -> some View {
+        configuration.label
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .padding()
+            .foregroundColor(.white)
+            .background(LinearGradient(gradient: Gradient(colors: [Color.orange, Color.red]), startPoint: .leading, endPoint: .trailing))
+            .cornerRadius(40)
+            .padding(.horizontal, 10)
+    }
+}
+
+struct Start: View {
+    @Binding var email: String
+    @Binding var user: String
+    @Binding var pass: String
+    @Binding var page: String
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("IntroMe!")
+                .font(.largeTitle)
+            Text(page)
+            Spacer()
+            HStack {
+                VStack {
+                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $user)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    SecureField("Password", text: $pass)
+                        .textContentType(.password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    HStack {
+                        Button(action: {self.page = "signup"}) {
+                            Text("Sign Up")
+                        } .buttonStyle(GradientBackgroundStyle())
+                        Button(action: {}) {
+                            Text("Log In")
+                               
+                        } .buttonStyle(GradientBackgroundStyle())
+                    }
+                }
+                .padding(.horizontal, 80.0)
+            }
+            Spacer()
+            Spacer()
+        }
+    }
+}
+
+struct SignupView: View {
+    @Binding var email: String
+    @Binding var user: String
+    @Binding var pass: String
+    @Binding var page: String
+    @State private var passConfirm: String = ""
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("IntroMe!")
+                .font(.largeTitle)
+            Spacer()
+            HStack {
+                VStack {
+                    TextField("Email", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $user)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    SecureField("Password", text: $pass)
+                        .textContentType(.password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    SecureField("Password", text: $passConfirm)
+                        .textContentType(.password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    HStack {
+                        Button(action: {
+                            if(self.pass == self.passConfirm) {
+                                self.page = "newuser"
+                            }
+                        }) {
+                            Text("Create Account!")
+                               
+                        } .buttonStyle(GradientBackgroundStyle())
+                    }
+                }
+                .padding(.horizontal, 80.0)
+            }
+            Spacer()
+            Spacer()
+        }
+    }
+}
+
+struct NewUserView: View {
+    var body: some View {
+        Form {
+            Text("info questions in here")
+        }
+    }
+}
+
+struct HomeView: View {
+    var body: some View {
+        Text("Hello World!")
     }
 }
