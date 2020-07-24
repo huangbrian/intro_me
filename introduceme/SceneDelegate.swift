@@ -12,6 +12,7 @@ import SwiftUI
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    var data = UserData()
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -25,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = UIHostingController(rootView: contentView)
+            window.rootViewController = UIHostingController(rootView: contentView.environmentObject(data))
             self.window = window
             window.makeKeyAndVisible()
         }
@@ -62,3 +63,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
+class UserData: ObservableObject {
+    @Published var email: String = ""
+    @Published var user: String = ""
+    @Published var pass: String = ""
+    @Published var details: [String: String] = [:]
+}
