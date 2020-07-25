@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,10 @@
 		1553A69E24C51B79005B9202 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1553A69C24C51B79005B9202 /* LaunchScreen.storyboard */; };
 		1553A6A924C51B79005B9202 /* introducemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1553A6A824C51B79005B9202 /* introducemeTests.swift */; };
 		1553A6B424C51B79005B9202 /* introducemeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1553A6B324C51B79005B9202 /* introducemeUITests.swift */; };
+		784CABD924CBE24800EA1763 /* ApiGatewayV2 in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABD824CBE24800EA1763 /* ApiGatewayV2 */; };
+		784CABDB24CBE24800EA1763 /* RDSDataService in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABDA24CBE24800EA1763 /* RDSDataService */; };
+		784CABDD24CBE24800EA1763 /* AWSSDKSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABDC24CBE24800EA1763 /* AWSSDKSwift */; };
+		784CABDF24CBE24800EA1763 /* RDS in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABDE24CBE24800EA1763 /* RDS */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +60,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				784CABDF24CBE24800EA1763 /* RDS in Frameworks */,
+				784CABDB24CBE24800EA1763 /* RDSDataService in Frameworks */,
+				784CABDD24CBE24800EA1763 /* AWSSDKSwift in Frameworks */,
+				784CABD924CBE24800EA1763 /* ApiGatewayV2 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +160,12 @@
 			dependencies = (
 			);
 			name = introduceme;
+			packageProductDependencies = (
+				784CABD824CBE24800EA1763 /* ApiGatewayV2 */,
+				784CABDA24CBE24800EA1763 /* RDSDataService */,
+				784CABDC24CBE24800EA1763 /* AWSSDKSwift */,
+				784CABDE24CBE24800EA1763 /* RDS */,
+			);
 			productName = introduceme;
 			productReference = 1553A68E24C51B76005B9202 /* introduceme.app */;
 			productType = "com.apple.product-type.application";
@@ -224,6 +238,9 @@
 				Base,
 			);
 			mainGroup = 1553A68524C51B76005B9202;
+			packageReferences = (
+				784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */,
+			);
 			productRefGroup = 1553A68F24C51B76005B9202 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -367,7 +384,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -422,7 +439,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -590,6 +607,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swift-aws/aws-sdk-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		784CABD824CBE24800EA1763 /* ApiGatewayV2 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
+			productName = ApiGatewayV2;
+		};
+		784CABDA24CBE24800EA1763 /* RDSDataService */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
+			productName = RDSDataService;
+		};
+		784CABDC24CBE24800EA1763 /* AWSSDKSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
+			productName = AWSSDKSwift;
+		};
+		784CABDE24CBE24800EA1763 /* RDS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
+			productName = RDS;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1553A68624C51B76005B9202 /* Project object */;
 }
