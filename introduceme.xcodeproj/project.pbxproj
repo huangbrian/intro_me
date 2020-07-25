@@ -15,6 +15,7 @@
 		1553A69E24C51B79005B9202 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1553A69C24C51B79005B9202 /* LaunchScreen.storyboard */; };
 		1553A6A924C51B79005B9202 /* introducemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1553A6A824C51B79005B9202 /* introducemeTests.swift */; };
 		1553A6B424C51B79005B9202 /* introducemeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1553A6B324C51B79005B9202 /* introducemeUITests.swift */; };
+		1594A8F824CC189E00E7CBEE /* app.py in Resources */ = {isa = PBXBuildFile; fileRef = 1594A8F724CC189E00E7CBEE /* app.py */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		1553A6AF24C51B79005B9202 /* introducemeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = introducemeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1553A6B324C51B79005B9202 /* introducemeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = introducemeUITests.swift; sourceTree = "<group>"; };
 		1553A6B524C51B79005B9202 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1594A8F724CC189E00E7CBEE /* app.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = app.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +104,7 @@
 				1553A69124C51B76005B9202 /* AppDelegate.swift */,
 				1553A69324C51B76005B9202 /* SceneDelegate.swift */,
 				1553A69524C51B76005B9202 /* ContentView.swift */,
+				1594A8F724CC189E00E7CBEE /* app.py */,
 				1553A69724C51B79005B9202 /* Assets.xcassets */,
 				1553A69C24C51B79005B9202 /* LaunchScreen.storyboard */,
 				1553A69F24C51B79005B9202 /* Info.plist */,
@@ -242,6 +245,7 @@
 			files = (
 				1553A69E24C51B79005B9202 /* LaunchScreen.storyboard in Resources */,
 				1553A69B24C51B79005B9202 /* Preview Assets.xcassets in Resources */,
+				1594A8F824CC189E00E7CBEE /* app.py in Resources */,
 				1553A69824C51B79005B9202 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
