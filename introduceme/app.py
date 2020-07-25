@@ -16,7 +16,6 @@ curId = 0
 for row in cursor.fetchall():
     curId = row[0]+1
 
-
 @app.route("/")
 def main():
     cursor.execute('''SELECT * FROM User;''')
@@ -29,8 +28,16 @@ def addusr():
     file = None;
     if request.method == "POST":
         file = request.form
-    print(isinstance(curId,int))
     cursor.execute('''INSERT INTO User(userId,username,email) values(%s,%s,%s);''',(curId,file['user'],file['email']))
+    cursor.execute('''COMMIT;''')
+    return str(file)
+
+@app.route("/usrInfo", methods=['POST'])
+def usrInfo():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''UPDATE User WHERE userId=%s SET occupation=%s,location=%s,age=%s;''',(file['userId'],file['occupation'],file['location'],file['age']))
     cursor.execute('''COMMIT;''')
     return str(file)
 
