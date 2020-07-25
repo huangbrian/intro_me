@@ -28,16 +28,43 @@ def addusr():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''INSERT INTO User(userId,username,email) values(%s,%s,%s);''',(curId,file['user'],file['email']))
+    cursor.execute('''INSERT INTO User(userId,username,email) VALUES(%s,%s,%s);''',(curId,file['user'],file['email']))
     cursor.execute('''COMMIT;''')
     return str(file)
 
-@app.route("/usrInfo", methods=['POST'])
-def usrInfo():
+@app.route("/insertinfo", methods=['POST'])
+def insertinfo():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''INSERT INTO User(userId,occupation,location,age) VALUES(%s,%s,%s,%s);''',(file['userId'],file['occupation'],file['location'],file['age']))
+    cursor.execute('''COMMIT;''')
+    return str(file)
+
+@app.route("/searchinfo", methods=['POST'])
+def searchinfo():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''SELECT * FROM User WHERE userId = %s;''',(file['userId']))
+    cursor.execute('''COMMIT;''')
+    return str(file)
+
+@app.route("/updateinfo", methods=['POST'])
+def updateinfo():
     file = None;
     if request.method == "POST":
         file = request.form
     cursor.execute('''UPDATE User WHERE userId=%s SET occupation=%s,location=%s,age=%s;''',(file['userId'],file['occupation'],file['location'],file['age']))
+    cursor.execute('''COMMIT;''')
+    return str(file)
+
+@app.route("/deleteinfo", methods=['POST'])
+def deleteinfo():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''DELETE FROM User WHERE userId=%s;''',(file['userId']))
     cursor.execute('''COMMIT;''')
     return str(file)
 
