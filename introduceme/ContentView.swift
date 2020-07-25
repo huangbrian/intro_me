@@ -29,8 +29,8 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     @State static var blah: String = ""
     static var previews: some View {
-        ContentView().environmentObject(UserData())
-//        SignupView(page: self.$blah).environmentObject(UserData())
+//        ContentView().environmentObject(UserData())
+        SignupView(page: self.$blah).environmentObject(UserData())
     }
 }
 

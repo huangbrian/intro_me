@@ -12,13 +12,15 @@ mysql.init_app(app)
 con = mysql.connect()
 cursor = con.cursor()
 cursor.execute('''SELECT MAX(userId) FROM User;''')
-curId = cursor.fetchall()
+curId = 0
+for row in cursor.fetchall():
+    curId = row[0]+1
 
 
 @app.route("/")
 def main():
-    #	cursor.execute('''SELECT * FROM User;''')
-    cursor.execute('''SELECT MAX(userId) FROM User;''')
+    cursor.execute('''SELECT * FROM User;''')
+#    cursor.execute('''SELECT MAX(userId) FROM User;''')
     res = cursor.fetchall()
     return str(res)
 
@@ -27,6 +29,9 @@ def addusr():
     file = None;
     if request.method == "POST":
         file = request.form
+    print(isinstance(curId,int))
+    cursor.execute('''INSERT INTO User(userId,username,email) values(%s,%s,%s);''',(curId,file['user'],file['email']))
+    cursor.execute('''COMMIT;''')
     return str(file)
 
 if __name__ == "__main__":
