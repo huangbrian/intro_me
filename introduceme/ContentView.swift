@@ -138,7 +138,7 @@ struct SignupView: View {
                                     "user":self.data.user,
                                     "pass":self.data.pass
                                 ]
-                                request.httpBody = params.percentEncoded()
+                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                                 self.httpPrepare(request: request, params: params)
                                 self.page = "newuser"
                             }
