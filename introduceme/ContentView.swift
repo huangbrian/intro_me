@@ -7,12 +7,6 @@
 //
 
 import SwiftUI
-import NIO
-import RDSDataService
-
-let accessKey = "AKIA56RRNAOVQXVCGR4Q"
-let secretKey = "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"
-let rds = RDSDataService(accessKeyId: accessKey, secretAccessKey: secretKey, region: .useast2)
 
 struct ContentView: View {
     @EnvironmentObject var data: UserData
@@ -33,8 +27,10 @@ struct ContentView: View {
 }
 
 struct ContentView_Previews: PreviewProvider {
+    @State static var blah: String = ""
     static var previews: some View {
-        ContentView()
+//        ContentView().environmentObject(UserData())
+        SignupView(page: self.$blah).environmentObject(UserData())
     }
 }
 
@@ -66,17 +62,16 @@ struct Start: View {
                     TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
-                    /*
                     SecureField("Password", text: $data.pass)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                     */
                     HStack {
                         Button(action: {self.page = "signup"}) {
                             Text("Sign Up")
                         } .buttonStyle(GradientBackgroundStyle())
-                        Button(action: {self.page = "home"}) {
+                        Button(action: {}) {
                             Text("Log In")
+                               
                         } .buttonStyle(GradientBackgroundStyle())
                     }
                 }
@@ -102,19 +97,46 @@ struct SignupView: View {
                 VStack {
                     TextField("Email", text: $data.email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.emailAddress)
+                        .textContentType(.username)
                     TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
-                    /*
                     SecureField("Password", text: $data.pass)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                    SecureField("Confirm Password", text: $passConfirm)
                         .textContentType(.password)
-                    */
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
                         Button(action: {
-                            if(true) {
+                            if(self.data.pass == self.passConfirm) {
+                                var request = URLRequest(url: URL(string: "http://localhost:5000/addusr")!)
+                                request.httpMethod = "POST"
+                                let params: [String:Any] = [
+                                    "email":self.data.email,
+                                    "user":self.data.user,
+                                    "pass":self.data.pass
+                                ]
+                                request.httpBody = params.percentEncoded()
+                                let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                                    guard let data = data,
+                                        let response = response as? HTTPURLResponse,
+                                        error == nil else {                                              // check for fundamental networking error
+                                        print("error", error ?? "Unknown error")
+                                        return
+                                    }
+
+                                    guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
+                                        print("statusCode should be 2xx, but is \(response.statusCode)")
+                                        print("response = \(response)")
+                                        return
+                                    }
+
+                                    let responseString = String(data: data, encoding: .utf8)
+                                    print("responseString = \(responseString)")
+                                }
+
+                                task.resume()
                                 self.page = "newuser"
                             }
                         }) {
@@ -141,30 +163,30 @@ struct NewUserView: View {
 
 struct HomeView: View {
     var body: some View {
-        Text("Hello World")
+        Text("Hello World!")
     }
 }
 
-struct AWSConnection {
-    func sendData() {
-        let resourceARN = "arn:aws:rds:us-east-2:958955062187:db:database-introduceme"
-        let transactionRequest = RDSDataService.BeginTransactionRequest(database: "database-introduceme", resourceArn: resourceARN, secretArn: secretKey)
-        var ID: String?
-        rds.beginTransaction(transactionRequest)
-            .flatMap { response -> EventLoopFuture<RDSDataService.ExecuteStatementResponse> in
-                let inputSQL = "INSERT INTO Activity VALUES (\"ABC\")"
-                ID = response.transactionId
-                let executeStatementRequest = RDSDataService.ExecuteStatementRequest(resourceArn: resourceARN, secretArn: secretKey, sql: inputSQL, transactionId: ID)
-                return rds.executeStatement(executeStatementRequest)
-            }
-            .flatMap { response -> EventLoopFuture<RDSDataService.CommitTransactionResponse> in
-                let commitTransactionRequest = RDSDataService.CommitTransactionRequest(resourceArn: resourceARN, secretArn: secretKey, transactionId: ID!)
-                return rds.commitTransaction(commitTransactionRequest)
-            }
-            .whenSuccess { response in
-                print(response)
-            }
+extension Dictionary {
+    func percentEncoded() -> Data? {
+        return map { key, value in
+            let escapedKey = "\(key)".addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? ""
+            let escapedValue = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? ""
+            return escapedKey + "=" + escapedValue
+        }
+        .joined(separator: "&")
+        .data(using: .utf8)
     }
-    
+}
+
+extension CharacterSet {
+    static let urlQueryValueAllowed: CharacterSet = {
+        let generalDelimitersToEncode = ":#[]@" // does not include "?" or "/" due to RFC 3986 - Section 3.4
+        let subDelimitersToEncode = "!$&'()*+,;="
+
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "\(generalDelimitersToEncode)\(subDelimitersToEncode)")
+        return allowed
+    }()
 }
 

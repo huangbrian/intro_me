@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,10 +15,7 @@
 		1553A69E24C51B79005B9202 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1553A69C24C51B79005B9202 /* LaunchScreen.storyboard */; };
 		1553A6A924C51B79005B9202 /* introducemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1553A6A824C51B79005B9202 /* introducemeTests.swift */; };
 		1553A6B424C51B79005B9202 /* introducemeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1553A6B324C51B79005B9202 /* introducemeUITests.swift */; };
-		784CABD924CBE24800EA1763 /* ApiGatewayV2 in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABD824CBE24800EA1763 /* ApiGatewayV2 */; };
-		784CABDB24CBE24800EA1763 /* RDSDataService in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABDA24CBE24800EA1763 /* RDSDataService */; };
-		784CABDD24CBE24800EA1763 /* AWSSDKSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABDC24CBE24800EA1763 /* AWSSDKSwift */; };
-		784CABDF24CBE24800EA1763 /* RDS in Frameworks */ = {isa = PBXBuildFile; productRef = 784CABDE24CBE24800EA1763 /* RDS */; };
+		1594A8F824CC189E00E7CBEE /* app.py in Resources */ = {isa = PBXBuildFile; fileRef = 1594A8F724CC189E00E7CBEE /* app.py */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +50,7 @@
 		1553A6AF24C51B79005B9202 /* introducemeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = introducemeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1553A6B324C51B79005B9202 /* introducemeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = introducemeUITests.swift; sourceTree = "<group>"; };
 		1553A6B524C51B79005B9202 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1594A8F724CC189E00E7CBEE /* app.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = app.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,10 +58,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				784CABDF24CBE24800EA1763 /* RDS in Frameworks */,
-				784CABDB24CBE24800EA1763 /* RDSDataService in Frameworks */,
-				784CABDD24CBE24800EA1763 /* AWSSDKSwift in Frameworks */,
-				784CABD924CBE24800EA1763 /* ApiGatewayV2 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +104,7 @@
 				1553A69124C51B76005B9202 /* AppDelegate.swift */,
 				1553A69324C51B76005B9202 /* SceneDelegate.swift */,
 				1553A69524C51B76005B9202 /* ContentView.swift */,
+				1594A8F724CC189E00E7CBEE /* app.py */,
 				1553A69724C51B79005B9202 /* Assets.xcassets */,
 				1553A69C24C51B79005B9202 /* LaunchScreen.storyboard */,
 				1553A69F24C51B79005B9202 /* Info.plist */,
@@ -160,12 +155,6 @@
 			dependencies = (
 			);
 			name = introduceme;
-			packageProductDependencies = (
-				784CABD824CBE24800EA1763 /* ApiGatewayV2 */,
-				784CABDA24CBE24800EA1763 /* RDSDataService */,
-				784CABDC24CBE24800EA1763 /* AWSSDKSwift */,
-				784CABDE24CBE24800EA1763 /* RDS */,
-			);
 			productName = introduceme;
 			productReference = 1553A68E24C51B76005B9202 /* introduceme.app */;
 			productType = "com.apple.product-type.application";
@@ -238,9 +227,6 @@
 				Base,
 			);
 			mainGroup = 1553A68524C51B76005B9202;
-			packageReferences = (
-				784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */,
-			);
 			productRefGroup = 1553A68F24C51B76005B9202 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -259,6 +245,7 @@
 			files = (
 				1553A69E24C51B79005B9202 /* LaunchScreen.storyboard in Resources */,
 				1553A69B24C51B79005B9202 /* Preview Assets.xcassets in Resources */,
+				1594A8F824CC189E00E7CBEE /* app.py in Resources */,
 				1553A69824C51B79005B9202 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -384,7 +371,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -439,7 +426,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -607,40 +594,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/swift-aws/aws-sdk-swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.7.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		784CABD824CBE24800EA1763 /* ApiGatewayV2 */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
-			productName = ApiGatewayV2;
-		};
-		784CABDA24CBE24800EA1763 /* RDSDataService */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
-			productName = RDSDataService;
-		};
-		784CABDC24CBE24800EA1763 /* AWSSDKSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
-			productName = AWSSDKSwift;
-		};
-		784CABDE24CBE24800EA1763 /* RDS */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 784CABD724CBE24800EA1763 /* XCRemoteSwiftPackageReference "aws-sdk-swift" */;
-			productName = RDS;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1553A68624C51B76005B9202 /* Project object */;
 }
