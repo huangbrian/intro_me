@@ -87,6 +87,27 @@ struct SignupView: View {
     @EnvironmentObject var data: UserData
     @Binding var page: String
     @State private var passConfirm: String = ""
+    func httpPrepare(request: URLRequest, params: [String:Any]) {
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data,
+                let response = response as? HTTPURLResponse,
+                error == nil else {                                              // check for fundamental networking error
+                print("error", error ?? "Unknown error")
+                return
+            }
+
+            guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
+                print("statusCode should be 2xx, but is \(response.statusCode)")
+                print("response = \(response)")
+                return
+            }
+
+            let responseString = String(data: data, encoding: .utf8)
+            print("responseString = \(String(describing: responseString))")
+        }
+
+        task.resume()
+    }
     var body: some View {
         VStack {
             Spacer()
@@ -117,26 +138,8 @@ struct SignupView: View {
                                     "user":self.data.user,
                                     "pass":self.data.pass
                                 ]
-                                request.httpBody = params.percentEncoded()
-                                let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                                    guard let data = data,
-                                        let response = response as? HTTPURLResponse,
-                                        error == nil else {                                              // check for fundamental networking error
-                                        print("error", error ?? "Unknown error")
-                                        return
-                                    }
-
-                                    guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
-                                        print("statusCode should be 2xx, but is \(response.statusCode)")
-                                        print("response = \(response)")
-                                        return
-                                    }
-
-                                    let responseString = String(data: data, encoding: .utf8)
-                                    print("responseString = \(responseString)")
-                                }
-
-                                task.resume()
+                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                                self.httpPrepare(request: request, params: params)
                                 self.page = "newuser"
                             }
                         }) {
