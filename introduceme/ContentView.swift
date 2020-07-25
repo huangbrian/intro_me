@@ -60,16 +60,17 @@ struct Start: View {
                     TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
+                    /*
                     SecureField("Password", text: $data.pass)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                     */
                     HStack {
                         Button(action: {self.page = "signup"}) {
                             Text("Sign Up")
                         } .buttonStyle(GradientBackgroundStyle())
-                        Button(action: {}) {
+                        Button(action: {self.page = "home"}) {
                             Text("Log In")
-                               
                         } .buttonStyle(GradientBackgroundStyle())
                     }
                 }
@@ -95,19 +96,19 @@ struct SignupView: View {
                 VStack {
                     TextField("Email", text: $data.email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
+                        .textContentType(.emailAddress)
                     TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
+                    /*
                     SecureField("Password", text: $data.pass)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                    SecureField("Password", text: $passConfirm)
                         .textContentType(.password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    */
                     HStack {
                         Button(action: {
-                            if(self.data.pass == self.passConfirm) {
+                            if(true) {
                                 self.page = "newuser"
                             }
                         }) {
