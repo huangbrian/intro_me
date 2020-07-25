@@ -7,6 +7,12 @@
 //
 
 import SwiftUI
+import NIO
+import RDSDataService
+
+let accessKey = "AKIA56RRNAOVQXVCGR4Q"
+let secretKey = "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"
+let rds = RDSDataService(accessKeyId: accessKey, secretAccessKey: secretKey, region: .useast2)
 
 struct ContentView: View {
     @EnvironmentObject var data: UserData
@@ -135,6 +141,30 @@ struct NewUserView: View {
 
 struct HomeView: View {
     var body: some View {
-        Text("Hello World!")
+        Text("Hello World")
     }
 }
+
+struct AWSConnection {
+    func sendData() {
+        let resourceARN = "arn:aws:rds:us-east-2:958955062187:db:database-introduceme"
+        let transactionRequest = RDSDataService.BeginTransactionRequest(database: "database-introduceme", resourceArn: resourceARN, secretArn: secretKey)
+        var ID: String?
+        rds.beginTransaction(transactionRequest)
+            .flatMap { response -> EventLoopFuture<RDSDataService.ExecuteStatementResponse> in
+                let inputSQL = "INSERT INTO Activity VALUES (\"ABC\")"
+                ID = response.transactionId
+                let executeStatementRequest = RDSDataService.ExecuteStatementRequest(resourceArn: resourceARN, secretArn: secretKey, sql: inputSQL, transactionId: ID)
+                return rds.executeStatement(executeStatementRequest)
+            }
+            .flatMap { response -> EventLoopFuture<RDSDataService.CommitTransactionResponse> in
+                let commitTransactionRequest = RDSDataService.CommitTransactionRequest(resourceArn: resourceARN, secretArn: secretKey, transactionId: ID!)
+                return rds.commitTransaction(commitTransactionRequest)
+            }
+            .whenSuccess { response in
+                print(response)
+            }
+    }
+    
+}
+
