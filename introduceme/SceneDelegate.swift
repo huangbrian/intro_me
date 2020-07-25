@@ -67,5 +67,8 @@ class UserData: ObservableObject {
     @Published var email: String = ""
     @Published var user: String = ""
     @Published var pass: String = ""
+    @Published var occupation: String = ""
+    @Published var location: String = ""
+    @Published var age: String = ""
     @Published var details: [String: String] = [:]
 }

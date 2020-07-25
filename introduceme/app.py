@@ -28,16 +28,7 @@ def addusr():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''INSERT INTO User(userId,username,email) VALUES(%s,%s,%s);''',(curId,file['user'],file['email']))
-    cursor.execute('''COMMIT;''')
-    return str(file)
-
-@app.route("/insertinfo", methods=['POST'])
-def insertinfo():
-    file = None;
-    if request.method == "POST":
-        file = request.form
-    cursor.execute('''INSERT INTO User(userId,occupation,location,age) VALUES(%s,%s,%s,%s);''',(file['userId'],file['occupation'],file['location'],file['age']))
+    cursor.execute('''INSERT INTO User(userId,username,email,occupation,location,age) VALUES(%s,%s,%s,%s,%s,%s);''',(curId,file['user'],file['email'],file['occupation'],file['location'],file['age']))
     cursor.execute('''COMMIT;''')
     return str(file)
 
@@ -46,7 +37,7 @@ def searchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''SELECT * FROM User WHERE userId = %s;''',(file['userId']))
+    cursor.execute('''SELECT * FROM User WHERE username = %s;''',(file['user']))
     cursor.execute('''COMMIT;''')
     return str(file)
 

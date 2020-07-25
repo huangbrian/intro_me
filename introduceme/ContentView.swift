@@ -38,8 +38,6 @@ struct ContentView: View {
     var body: some View {
         if(page == "signup") {
             SignupView(page: self.$page)
-        } else if(page == "newuser") {
-            NewUserView()
         } else if(page == "home") {
             HomeView()
         } else {
@@ -129,6 +127,15 @@ struct SignupView: View {
                     SecureField("Confirm Password", text: $passConfirm)
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                    TextField("Occupation", text: $data.occupation)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField("Location", text: $data.location)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField("Age", text: $data.age)
+                        .textContentType(.username)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
                         Button(action: {
                             if(self.data.pass == self.passConfirm) {
@@ -137,11 +144,13 @@ struct SignupView: View {
                                 let params: [String:Any] = [
                                     "email":self.data.email,
                                     "user":self.data.user,
-                                    "pass":self.data.pass
+                                    "occupation":self.data.occupation,
+                                    "location":self.data.location,
+                                    "age":self.data.age
                                 ]
                                 request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                                 httpPrepare(request: request, params: params)
-                                self.page = "newuser"
+                                self.page = "home"
                             }
                         }) {
                             Text("Create Account!")
@@ -157,10 +166,61 @@ struct SignupView: View {
     }
 }
 
-struct NewUserView: View {
+struct SearchView: View {
+
+}
+
+struct UpdateView: View {
+    @EnvironmentObject var data: UserData
+    @Binding var page: String
+    @State private var passConfirm: String = ""
     var body: some View {
-        Form {
-            Text("info questions in here")
+        VStack {
+            Spacer()
+            Text("IntroMe!")
+                .font(.largeTitle)
+            Spacer()
+            HStack {
+                VStack {
+                    TextField("Email", text: $data.email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField("Occupation", text: $data.occupation)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField("Location", text: $data.location)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.username)
+                    TextField("Age", text: $data.age)
+                        .textContentType(.username)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    HStack {
+                        Button(action: {
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/updateinfo")!)
+                            request.httpMethod = "POST"
+                            let params: [String:Any] = [
+                                "email":self.data.email,
+                                "user":self.data.user,
+                                "occupation":self.data.occupation,
+                                "location":self.data.location,
+                                "age":self.data.age
+                            ]
+                            request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                            httpPrepare(request: request, params: params)
+                            self.page = "home"
+                        }) {
+                            Text("Create Account!")
+                               
+                        } .buttonStyle(GradientBackgroundStyle())
+                    }
+                }
+                .padding(.horizontal, 80.0)
+            }
+            Spacer()
+            Spacer()
         }
     }
 }
