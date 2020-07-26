@@ -71,7 +71,9 @@ class UserData: ObservableObject {
     @Published var occupation: String = ""
     @Published var location: String = ""
     @Published var age: String = ""
-    @Published var details: [String: String] = [:]
+    @Published var major: String = ""
+    @Published var researcharea: String = ""
+    @Published var details: [String] = []
 }
 
 class UserSearchDisplay: ObservableObject {

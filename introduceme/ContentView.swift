@@ -36,8 +36,12 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                 display.names.removeAll()
                 for entry in array {
                     if let tup = entry as? [Any] {
-                        display.ids.append(tup[0] as! Int)
-                        display.names.append(tup[1] as! String)
+                        if(tup.count>1) {
+                            display.ids.append(tup[0] as! Int)
+                            display.names.append((tup[1] as! String)+", "+(tup[2] as! String))
+                        } else {
+                            udata.details.append(tup[0] as! String)
+                        }
                     }
                 }
             }
@@ -59,6 +63,8 @@ struct ContentView: View {
             HomeView(page: self.$page)
         } else if(page == "update") {
             UpdateView(page: self.$page)
+        } else if(page == "interests") {
+            InterestView(page: self.$page)
         } else {
             Start(page: self.$page)
         }
@@ -207,7 +213,7 @@ struct UpdateView: View {
                                
                         } .buttonStyle(GradientBackgroundStyle())
                         Button(action: {
-                            var request = URLRequest(url: URL(string: "http://localhost:5000/deleteinfo")!)
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/deleteuser")!)
                             request.httpMethod = "POST"
                             let params: [String:Any] = [
                                 "userId":self.data.uID,
@@ -266,8 +272,8 @@ struct HomeView: View {
                 .frame(height: 1)
                 .padding(.horizontal, 10)
             List {
-                if display.ids.count > 0 {
-                    ForEach(Range(0...display.ids.count-1),id:\.self) {i in
+                if display.names.count > 0 {
+                    ForEach(Range(0...display.names.count-1),id:\.self) {i in
                         Button(action: {}) {
                             Text(self.display.names[i])
                         }
@@ -275,6 +281,83 @@ struct HomeView: View {
                 }
             }
             Spacer()
+            Button(action: {
+                self.page = "interests"
+                var request = URLRequest(url: URL(string: "http://localhost:5000/getinterests")!)
+                request.httpMethod = "POST"
+                let params: [String:Any] = [
+                    "userId":self.data.uID
+                ]
+                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                self.data.details.removeAll()
+                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+            }) {
+                Text("Manage interests")
+            }
+        }
+    }
+}
+
+struct InterestView: View {
+    @EnvironmentObject var data: UserData
+    @State var search: String = ""
+    @Binding var page: String
+    @State var interest: String = ""
+    var body: some View {
+        VStack {
+            List {
+                Section(header: Text("Already interested in")) {
+                    if data.details.count > 0 {
+                        ForEach(Range(0...data.details.count-1)) {n in
+                            HStack {
+                                Text(self.data.details[n])
+                                Spacer()
+                                Button(action: {
+                                    self.page = "home"
+                                    var request = URLRequest(url: URL(string: "http://localhost:5000/uninterested")!)
+                                    request.httpMethod = "POST"
+                                    let params: [String:Any] = [
+                                        "userId":self.data.uID,
+                                        "activity":self.data.details[n]
+                                    ]
+                                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                                    httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                                }) {
+                                    Text("X")
+                                }
+                            }
+                        }
+                    }
+                }
+                
+//                if data.occupation == "Student" {
+//                    Section(header: Text("What's your major?")) {
+//                        TextField("Ex: marketing", text:$data.major)
+//                    }
+//                } else if data.occupation == "Faculty" {
+//                    Section(header: Text("What are you researching?")) {
+//                        TextField("Ex: Databases", text:$data.researcharea)
+//                    }
+//                }
+                Section(header: Text("Add your interests")) {
+                    TextField("name new interest here", text: $interest)
+                }
+            }
+            Button(action: {
+                self.page = "home"
+                if(self.interest != "") {
+                    var request = URLRequest(url: URL(string: "http://localhost:5000/interests")!)
+                    request.httpMethod = "POST"
+                    let params: [String:Any] = [
+                        "userId":self.data.uID,
+                        "activity":self.interest
+                    ]
+                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                    httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                }
+            }) {
+                Text("Add interest")
+            }
         }
     }
 }
@@ -331,6 +414,6 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
 //        ContentView().environmentObject(UserData())
 //        SignupView(page: self.$blah).environmentObject(UserData())
-        HomeView(page: self.$blah).environmentObject(UserData())
+        InterestView(page: self.$blah).environmentObject(UserData())
     }
 }
