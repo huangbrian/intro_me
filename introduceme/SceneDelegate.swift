@@ -64,6 +64,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 
 class UserData: ObservableObject {
+    @Published var uID: Int = -1
     @Published var email: String = ""
     @Published var user: String = ""
     @Published var pass: String = ""
@@ -71,4 +72,9 @@ class UserData: ObservableObject {
     @Published var location: String = ""
     @Published var age: String = ""
     @Published var details: [String: String] = [:]
+}
+
+class UserSearchDisplay: ObservableObject {
+    @Published var names: [String] = []
+    @Published var ids: [Int] = []
 }

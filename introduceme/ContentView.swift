@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-func httpPrepare(request: URLRequest, params: [String:Any]) {
+func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, display: UserSearchDisplay) {
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         guard let data = data,
             let response = response as? HTTPURLResponse,
@@ -22,9 +22,26 @@ func httpPrepare(request: URLRequest, params: [String:Any]) {
             print("response = \(response)")
             return
         }
-
+        
         let responseString = String(data: data, encoding: .utf8)
         print("responseString = \(String(describing: responseString))")
+        let json = try? JSONSerialization.jsonObject(with: data, options: [])
+        
+        DispatchQueue.main.async {
+            if let res = json as? [String: Any] {
+                udata.uID = res["id"] as! Int
+            }
+            if let array = json as? [Any] {
+                display.ids.removeAll()
+                display.names.removeAll()
+                for entry in array {
+                    if let tup = entry as? [Any] {
+                        display.ids.append(tup[0] as! Int)
+                        display.names.append(tup[1] as! String)
+                    }
+                }
+            }
+        }
     }
 
     task.resume()
@@ -39,31 +56,12 @@ struct ContentView: View {
         if(page == "signup") {
             SignupView(page: self.$page)
         } else if(page == "home") {
-            HomeView()
+            HomeView(page: self.$page)
+        } else if(page == "update") {
+            UpdateView(page: self.$page)
         } else {
             Start(page: self.$page)
         }
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    @State static var blah: String = ""
-    static var previews: some View {
-//        ContentView().environmentObject(UserData())
-        SignupView(page: self.$blah).environmentObject(UserData())
-    }
-}
-
-struct GradientBackgroundStyle: ButtonStyle {
- 
-    func makeBody(configuration: Self.Configuration) -> some View {
-        configuration.label
-            .frame(minWidth: 0, maxWidth: .infinity)
-            .padding()
-            .foregroundColor(.white)
-            .background(LinearGradient(gradient: Gradient(colors: [Color.orange, Color.red]), startPoint: .leading, endPoint: .trailing))
-            .cornerRadius(40)
-            .padding(.horizontal, 10)
     }
 }
 
@@ -117,8 +115,8 @@ struct SignupView: View {
                 VStack {
                     TextField("Email", text: $data.email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
-                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
+                        .textContentType(.emailAddress)
+                    TextField("Username", text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
                     SecureField("Password", text: $data.pass)
@@ -129,12 +127,10 @@ struct SignupView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     TextField("Occupation", text: $data.occupation)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
                     TextField("Location", text: $data.location)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
+                        .textContentType(.location)
                     TextField("Age", text: $data.age)
-                        .textContentType(.username)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
                         Button(action: {
@@ -149,7 +145,7 @@ struct SignupView: View {
                                     "age":self.data.age
                                 ]
                                 request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                                httpPrepare(request: request, params: params)
+                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
                                 self.page = "home"
                             }
                         }) {
@@ -166,10 +162,6 @@ struct SignupView: View {
     }
 }
 
-struct SearchView: View {
-
-}
-
 struct UpdateView: View {
     @EnvironmentObject var data: UserData
     @Binding var page: String
@@ -177,31 +169,30 @@ struct UpdateView: View {
     var body: some View {
         VStack {
             Spacer()
-            Text("IntroMe!")
-                .font(.largeTitle)
+            Text("Update Account")
+                .font(.title)
             Spacer()
             HStack {
                 VStack {
                     TextField("Email", text: $data.email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
-                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
+                        .textContentType(.emailAddress)
+                    TextField("Username", text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
                     TextField("Occupation", text: $data.occupation)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
                     TextField("Location", text: $data.location)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.username)
+                        .textContentType(.location)
                     TextField("Age", text: $data.age)
-                        .textContentType(.username)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     HStack {
                         Button(action: {
                             var request = URLRequest(url: URL(string: "http://localhost:5000/updateinfo")!)
                             request.httpMethod = "POST"
                             let params: [String:Any] = [
+                                "userId":self.data.uID,
                                 "email":self.data.email,
                                 "user":self.data.user,
                                 "occupation":self.data.occupation,
@@ -209,11 +200,28 @@ struct UpdateView: View {
                                 "age":self.data.age
                             ]
                             request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                            httpPrepare(request: request, params: params)
+                            httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
                             self.page = "home"
                         }) {
-                            Text("Create Account!")
+                            Text("Update Info")
                                
+                        } .buttonStyle(GradientBackgroundStyle())
+                        Button(action: {
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/deleteinfo")!)
+                            request.httpMethod = "POST"
+                            let params: [String:Any] = [
+                                "userId":self.data.uID,
+                                "email":self.data.email,
+                                "user":self.data.user,
+                                "occupation":self.data.occupation,
+                                "location":self.data.location,
+                                "age":self.data.age
+                            ]
+                            request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                            httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                            self.page = ""
+                        }) {
+                            Text("Delete Account")
                         } .buttonStyle(GradientBackgroundStyle())
                     }
                 }
@@ -226,8 +234,48 @@ struct UpdateView: View {
 }
 
 struct HomeView: View {
+    @EnvironmentObject var data: UserData
+    @State var search: String = ""
+    @Binding var page: String
+    @ObservedObject var display: UserSearchDisplay = UserSearchDisplay()
     var body: some View {
-        Text("Hello World!")
+        VStack {
+            HStack {
+                Button(action: {self.page = "update"}) {
+                    Text("Update Personal Info")
+                }
+                .padding(.horizontal, 10)
+                Spacer()
+                Text("IntroMe")
+                    .font(.title).padding(.horizontal, 10)
+            }
+            HStack {
+                Text("Find other users:")
+                TextField("Search by name...", text: $search, onCommit: {
+                    var request = URLRequest(url: URL(string: "http://localhost:5000/search")!)
+                    request.httpMethod = "POST"
+                    let params: [String:Any] = [
+                        "key":self.search
+                    ]
+                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                    httpPrepare(request: request, params: params, udata: self.data, display: self.display)
+                })
+//                    .textFieldStyle(BottomLineTextFieldStyle())
+            }.padding(.horizontal, 10)
+            Divider()
+                .frame(height: 1)
+                .padding(.horizontal, 10)
+            List {
+                if display.ids.count > 0 {
+                    ForEach(Range(0...display.ids.count-1),id:\.self) {i in
+                        Button(action: {}) {
+                            Text(self.display.names[i])
+                        }
+                    }
+                }
+            }
+            Spacer()
+        }
     }
 }
 
@@ -254,3 +302,35 @@ extension CharacterSet {
     }()
 }
 
+struct GradientBackgroundStyle: ButtonStyle {
+ 
+    func makeBody(configuration: Self.Configuration) -> some View {
+        configuration.label
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .padding()
+            .foregroundColor(.white)
+            .background(LinearGradient(gradient: Gradient(colors: [Color.orange, Color.red]), startPoint: .leading, endPoint: .trailing))
+            .cornerRadius(40)
+            .padding(.horizontal, 10)
+    }
+}
+
+struct BottomLineTextFieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        VStack() {
+            configuration
+            Rectangle()
+                .frame(height: 0.2, alignment: .bottom)
+                .foregroundColor(Color.secondary)
+        }
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    @State static var blah: String = ""
+    static var previews: some View {
+//        ContentView().environmentObject(UserData())
+//        SignupView(page: self.$blah).environmentObject(UserData())
+        HomeView(page: self.$blah).environmentObject(UserData())
+    }
+}
