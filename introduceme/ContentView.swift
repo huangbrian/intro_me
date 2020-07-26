@@ -65,6 +65,10 @@ struct ContentView: View {
             UpdateView(page: self.$page)
         } else if(page == "interests") {
             InterestView(page: self.$page)
+        } else if (page == "student") {
+            StudentView(page: self.$page)
+        } else if (page == "faculty") {
+            FacultyView(page: self.$page)
         } else {
             Start(page: self.$page)
         }
@@ -152,8 +156,73 @@ struct SignupView: View {
                                 ]
                                 request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                                 httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
-                                self.page = "home"
+                                self.page = "student"
                             }
+                        }) {
+                            Text("I'm a student")
+                               
+                        } .buttonStyle(GradientBackgroundStyle())
+                    }
+                    HStack {
+                        Button(action: {
+                            if(self.data.pass == self.passConfirm) {
+                                var request = URLRequest(url: URL(string: "http://localhost:5000/addusr")!)
+                                request.httpMethod = "POST"
+                                let params: [String:Any] = [
+                                    "email":self.data.email,
+                                    "user":self.data.user,
+                                    "occupation":self.data.occupation,
+                                    "location":self.data.location,
+                                    "age":self.data.age
+                                ]
+                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                                self.page = "faculty"
+                            }
+                        }) {
+                            Text("I'm a faculty member")
+                               
+                        } .buttonStyle(GradientBackgroundStyle())
+                    }
+                }
+                .padding(.horizontal, 80.0)
+            }
+            Spacer()
+            Spacer()
+        }
+    }
+}
+
+struct StudentView: View {
+    @EnvironmentObject var data: UserData
+    @Binding var page: String
+    @State private var passConfirm: String = ""
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("Student")
+                .font(.largeTitle)
+            Spacer()
+            HStack {
+                VStack {
+                    TextField("Major", text: $data.major)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.name)
+                    TextField("Are you an undergraduate?", text: $data.undergrad)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.name)
+                    HStack {
+                        Button(action: {
+                                var request = URLRequest(url: URL(string: "http://localhost:5000/addstudent")!)
+                                request.httpMethod = "POST"
+                                let params: [String:Any] = [
+                                    "userId":self.data.uID,
+                                    "major":self.data.major,
+                                    "undergrad":self.data.undergrad
+                                ]
+                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                                self.page = "home"
                         }) {
                             Text("Create Account!")
                                
@@ -168,6 +237,49 @@ struct SignupView: View {
     }
 }
 
+struct FacultyView: View {
+    @EnvironmentObject var data: UserData
+    @Binding var page: String
+    @State private var passConfirm: String = ""
+    var body: some View {
+        VStack {
+            Spacer()
+            Text("Faculty")
+                .font(.largeTitle)
+            Spacer()
+            HStack {
+                VStack {
+                    TextField("Research area", text: $data.researcharea)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.name)
+                    TextField("Are you in management?", text: $data.management)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textContentType(.name)
+                    HStack {
+                        Button(action: {
+                                var request = URLRequest(url: URL(string: "http://localhost:5000/addfaculty")!)
+                                request.httpMethod = "POST"
+                                let params: [String:Any] = [
+                                    "userId":self.data.uID,
+                                    "researcharea":self.data.researcharea,
+                                    "management":self.data.management
+                                ]
+                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                                self.page = "home"
+                        }) {
+                            Text("Create Account!")
+                               
+                        } .buttonStyle(GradientBackgroundStyle())
+                    }
+                }
+                .padding(.horizontal, 80.0)
+            }
+            Spacer()
+            Spacer()
+        }
+    }
+}
 struct UpdateView: View {
     @EnvironmentObject var data: UserData
     @Binding var page: String
