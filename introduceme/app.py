@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flaskext.mysql import MySQL
 app = Flask(__name__)
 
@@ -21,43 +21,80 @@ def main():
     cursor.execute('''SELECT * FROM User;''')
 #    cursor.execute('''SELECT MAX(userId) FROM User;''')
     res = cursor.fetchall()
-    return str(res)
+    return jsonify(res)
 
 @app.route("/addusr", methods=['POST'])
 def addusr():
+    global curId
     file = None;
     if request.method == "POST":
         file = request.form
     cursor.execute('''INSERT INTO User(userId,username,email,occupation,location,age) VALUES(%s,%s,%s,%s,%s,%s);''',(curId,file['user'],file['email'],file['occupation'],file['location'],file['age']))
     cursor.execute('''COMMIT;''')
-    return str(file)
+    curId+=1
+    return jsonify(id=curId-1)
 
-@app.route("/searchinfo", methods=['POST'])
+@app.route("/getinterests",methods=['POST'])
+def getinterests():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''SELECT activityName FROM Interested_In WHERE userId=%s''',(file['userId']))
+    res = cursor.fetchall()
+    return jsonify(res)
+
+@app.route("/interests",methods=['POST'])
+def interests():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''INSERT IGNORE INTO Interested_In(userId,activityName) VALUES(%s,%s);''',(file['userId'],file['activity']))
+    cursor.execute('''INSERT IGNORE INTO Activity VALUES(%s);''',(file['activity']))
+    cursor.execute('''COMMIT;''')
+    return 'interests updated'
+    
+@app.route("/uninterested",methods=['POST'])
+def uninterested():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''DELETE FROM Interested_In WHERE userId=%s AND activityName=%s;''',(file['userId'],file['activity']))
+    cursor.execute('''COMMIT;''')
+    return 'interest removed'
+
+@app.route("/search", methods=['POST'])
 def searchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''SELECT * FROM User WHERE username = %s;''',(file['user']))
-    cursor.execute('''COMMIT;''')
-    return str(file)
+    searchkey = file['key'] + '%'
+    cursor.execute('''SELECT userId,username,location FROM User WHERE username LIKE %s;''',(searchkey))
+    res = cursor.fetchall()
+    print(str(res))
+    return jsonify(res)
 
 @app.route("/updateinfo", methods=['POST'])
 def updateinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''UPDATE User WHERE userId=%s SET occupation=%s,location=%s,age=%s;''',(file['userId'],file['occupation'],file['location'],file['age']))
+    cursor.execute('''UPDATE User SET username=%s,email=%s,occupation=%s,location=%s,age=%s WHERE userId=%s ;''',(file['user'],file['email'],file['occupation'],file['location'],file['age'],file['userId']))
     cursor.execute('''COMMIT;''')
-    return str(file)
+    return 'update successful'
 
-@app.route("/deleteinfo", methods=['POST'])
+@app.route("/deleteuser", methods=['POST'])
 def deleteinfo():
+    global curId
     file = None;
     if request.method == "POST":
         file = request.form
     cursor.execute('''DELETE FROM User WHERE userId=%s;''',(file['userId']))
     cursor.execute('''COMMIT;''')
-    return str(file)
+    cursor.execute('''SELECT MAX(userId) FROM User;''')
+    curId = 0
+    for row in cursor.fetchall():
+        curId = row[0]+1
+    return 'delete successful'
 
 if __name__ == "__main__":
     app.run()
