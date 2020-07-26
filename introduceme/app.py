@@ -34,13 +34,41 @@ def addusr():
     curId+=1
     return jsonify(id=curId-1)
 
+@app.route("/getinterests",methods=['POST'])
+def getinterests():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''SELECT activityName FROM Interested_In WHERE userId=%s''',(file['userId']))
+    res = cursor.fetchall()
+    return jsonify(res)
+
+@app.route("/interests",methods=['POST'])
+def interests():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''INSERT IGNORE INTO Interested_In(userId,activityName) VALUES(%s,%s);''',(file['userId'],file['activity']))
+    cursor.execute('''INSERT IGNORE INTO Activity VALUES(%s);''',(file['activity']))
+    cursor.execute('''COMMIT;''')
+    return 'interests updated'
+    
+@app.route("/uninterested",methods=['POST'])
+def uninterested():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''DELETE FROM Interested_In WHERE userId=%s AND activityName=%s;''',(file['userId'],file['activity']))
+    cursor.execute('''COMMIT;''')
+    return 'interest removed'
+
 @app.route("/search", methods=['POST'])
 def searchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
     searchkey = file['key'] + '%'
-    cursor.execute('''SELECT userId,username FROM User WHERE username LIKE %s;''',(searchkey))
+    cursor.execute('''SELECT userId,username,location FROM User WHERE username LIKE %s;''',(searchkey))
     res = cursor.fetchall()
     print(str(res))
     return jsonify(res)
@@ -54,7 +82,7 @@ def updateinfo():
     cursor.execute('''COMMIT;''')
     return 'update successful'
 
-@app.route("/deleteinfo", methods=['POST'])
+@app.route("/deleteuser", methods=['POST'])
 def deleteinfo():
     global curId
     file = None;
