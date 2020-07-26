@@ -33,6 +33,24 @@ def addusr():
     cursor.execute('''COMMIT;''')
     curId+=1
     return jsonify(id=curId-1)
+    
+@app.route("/addstudent", methods=['POST'])
+def addstudent():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''INSERT INTO Student(userId,major,is_undergraduate) VALUES(%s,%s,%s);''',(file['userId'],file['major'],file['undergrad']))
+    cursor.execute('''COMMIT;''')
+    return 'student added'
+    
+@app.route("/addstudent", methods=['POST'])
+def addfaculty():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''INSERT INTO Faculty(userId,research_area,is_management) VALUES(%s,%s,%s);''',(file['userId'],file['researcharea'],file['management']))
+    cursor.execute('''COMMIT;''')
+    return 'faculty added'
 
 @app.route("/getinterests",methods=['POST'])
 def getinterests():
