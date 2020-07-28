@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, display: UserSearchDisplay) {
+func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, display: UserSearchDisplay = UserSearchDisplay()) {
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         guard let data = data,
             let response = response as? HTTPURLResponse,
@@ -39,8 +39,14 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                         if(tup.count>1) {
                             display.ids.append(tup[0] as! Int)
                             display.names.append((tup[1] as! String)+", "+(tup[2] as! String))
-                        } else {
-                            udata.details.append(tup[0] as! String)
+                        }
+                    }
+                }
+                if(display.ids.count == 0) {
+                    udata.details.removeAll()
+                    for entry in array {
+                        if let interest = entry as? [String] {
+                            udata.details.append(interest[0])
                         }
                     }
                 }
@@ -65,10 +71,6 @@ struct ContentView: View {
             UpdateView(page: self.$page)
         } else if(page == "interests") {
             InterestView(page: self.$page)
-        } else if (page == "student") {
-            StudentView(page: self.$page)
-        } else if (page == "faculty") {
-            FacultyView(page: self.$page)
         } else {
             Start(page: self.$page)
         }
@@ -87,7 +89,7 @@ struct Start: View {
             Spacer()
             HStack {
                 VStack {
-                    TextField(/*@START_MENU_TOKEN@*/"Username"/*@END_MENU_TOKEN@*/, text: $data.user)
+                    TextField("Username", text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
                     SecureField("Password", text: $data.pass)
@@ -155,74 +157,9 @@ struct SignupView: View {
                                     "age":self.data.age
                                 ]
                                 request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
-                                self.page = "student"
-                            }
-                        }) {
-                            Text("I'm a student")
-                               
-                        } .buttonStyle(GradientBackgroundStyle())
-                    }
-                    HStack {
-                        Button(action: {
-                            if(self.data.pass == self.passConfirm) {
-                                var request = URLRequest(url: URL(string: "http://localhost:5000/addusr")!)
-                                request.httpMethod = "POST"
-                                let params: [String:Any] = [
-                                    "email":self.data.email,
-                                    "user":self.data.user,
-                                    "occupation":self.data.occupation,
-                                    "location":self.data.location,
-                                    "age":self.data.age
-                                ]
-                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
-                                self.page = "faculty"
-                            }
-                        }) {
-                            Text("I'm a faculty member")
-                               
-                        } .buttonStyle(GradientBackgroundStyle())
-                    }
-                }
-                .padding(.horizontal, 80.0)
-            }
-            Spacer()
-            Spacer()
-        }
-    }
-}
-
-struct StudentView: View {
-    @EnvironmentObject var data: UserData
-    @Binding var page: String
-    @State private var passConfirm: String = ""
-    var body: some View {
-        VStack {
-            Spacer()
-            Text("Student")
-                .font(.largeTitle)
-            Spacer()
-            HStack {
-                VStack {
-                    TextField("Major", text: $data.major)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.name)
-                    TextField("Are you an undergraduate?", text: $data.undergrad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.name)
-                    HStack {
-                        Button(action: {
-                                var request = URLRequest(url: URL(string: "http://localhost:5000/addstudent")!)
-                                request.httpMethod = "POST"
-                                let params: [String:Any] = [
-                                    "userId":self.data.uID,
-                                    "major":self.data.major,
-                                    "undergrad":self.data.undergrad
-                                ]
-                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                                httpPrepare(request: request, params: params, udata: self.data)
                                 self.page = "home"
+                            }
                         }) {
                             Text("Create Account!")
                                
@@ -237,49 +174,6 @@ struct StudentView: View {
     }
 }
 
-struct FacultyView: View {
-    @EnvironmentObject var data: UserData
-    @Binding var page: String
-    @State private var passConfirm: String = ""
-    var body: some View {
-        VStack {
-            Spacer()
-            Text("Faculty")
-                .font(.largeTitle)
-            Spacer()
-            HStack {
-                VStack {
-                    TextField("Research area", text: $data.researcharea)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.name)
-                    TextField("Are you in management?", text: $data.management)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textContentType(.name)
-                    HStack {
-                        Button(action: {
-                                var request = URLRequest(url: URL(string: "http://localhost:5000/addfaculty")!)
-                                request.httpMethod = "POST"
-                                let params: [String:Any] = [
-                                    "userId":self.data.uID,
-                                    "researcharea":self.data.researcharea,
-                                    "management":self.data.management
-                                ]
-                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
-                                self.page = "home"
-                        }) {
-                            Text("Create Account!")
-                               
-                        } .buttonStyle(GradientBackgroundStyle())
-                    }
-                }
-                .padding(.horizontal, 80.0)
-            }
-            Spacer()
-            Spacer()
-        }
-    }
-}
 struct UpdateView: View {
     @EnvironmentObject var data: UserData
     @Binding var page: String
@@ -318,7 +212,7 @@ struct UpdateView: View {
                                 "age":self.data.age
                             ]
                             request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                            httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                            httpPrepare(request: request, params: params, udata: self.data)
                             self.page = "home"
                         }) {
                             Text("Update Info")
@@ -336,7 +230,7 @@ struct UpdateView: View {
                                 "age":self.data.age
                             ]
                             request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                            httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                            httpPrepare(request: request, params: params, udata: self.data)
                             self.page = ""
                         }) {
                             Text("Delete Account")
@@ -377,6 +271,9 @@ struct HomeView: View {
                     ]
                     request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                     httpPrepare(request: request, params: params, udata: self.data, display: self.display)
+                    print("here")
+                    print(self.display.names)
+                    print("here")
                 })
 //                    .textFieldStyle(BottomLineTextFieldStyle())
             }.padding(.horizontal, 10)
@@ -384,8 +281,8 @@ struct HomeView: View {
                 .frame(height: 1)
                 .padding(.horizontal, 10)
             List {
-                if display.names.count > 0 {
-                    ForEach(Range(0...display.names.count-1),id:\.self) {i in
+                if self.display.names.count > 0 {
+                    ForEach(Range(0...self.display.names.count-1),id:\.self) {i in
                         Button(action: {}) {
                             Text(self.display.names[i])
                         }
@@ -394,6 +291,7 @@ struct HomeView: View {
             }
             Spacer()
             Button(action: {
+                self.data.details.removeAll()
                 self.page = "interests"
                 var request = URLRequest(url: URL(string: "http://localhost:5000/getinterests")!)
                 request.httpMethod = "POST"
@@ -402,7 +300,7 @@ struct HomeView: View {
                 ]
                 request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                 self.data.details.removeAll()
-                httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                httpPrepare(request: request, params: params, udata: self.data)
             }) {
                 Text("Manage interests")
             }
@@ -420,12 +318,12 @@ struct InterestView: View {
             List {
                 Section(header: Text("Already interested in")) {
                     if data.details.count > 0 {
-                        ForEach(Range(0...data.details.count-1)) {n in
+                        ForEach(Range(0...data.details.count-1),id: \.self) {n in
                             HStack {
                                 Text(self.data.details[n])
                                 Spacer()
                                 Button(action: {
-                                    self.page = "home"
+//                                    self.page = "home"
                                     var request = URLRequest(url: URL(string: "http://localhost:5000/uninterested")!)
                                     request.httpMethod = "POST"
                                     let params: [String:Any] = [
@@ -433,42 +331,79 @@ struct InterestView: View {
                                         "activity":self.data.details[n]
                                     ]
                                     request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                                    httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+                                    httpPrepare(request: request, params: params, udata: self.data)
                                 }) {
-                                    Text("X")
+                                    Text("x")
                                 }
                             }
                         }
                     }
                 }
                 
-//                if data.occupation == "Student" {
-//                    Section(header: Text("What's your major?")) {
-//                        TextField("Ex: marketing", text:$data.major)
-//                    }
-//                } else if data.occupation == "Faculty" {
-//                    Section(header: Text("What are you researching?")) {
-//                        TextField("Ex: Databases", text:$data.researcharea)
-//                    }
-//                }
+                if data.occupation == "Student" {
+                    Section(header: Text("What's your major?")) {
+                        TextField("Ex: marketing", text:$data.major, onCommit: {
+                            let params: [String:Any] = [
+                                "userId":self.data.uID,
+                                "major":self.data.major
+                            ]
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/student_major")!)
+                            request.httpMethod = "POST"
+                            request.httpBody = params.percentEncoded()
+                            httpPrepare(request: request, params: params, udata: self.data)
+                        })
+                        TextField("Undergrad or graduate?", text:$data.grad, onCommit: {
+                            let params: [String:Any] = [
+                                "userId":self.data.uID,
+                                "is_ug":self.data.grad
+                            ]
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/student_ug")!)
+                            request.httpMethod = "POST"
+                            request.httpBody = params.percentEncoded()
+                            httpPrepare(request: request, params: params, udata: self.data)
+                        })
+                    }
+                } else if data.occupation == "Faculty" {
+                    Section(header: Text("What are you researching?")) {
+                        TextField("Ex: Databases", text:$data.researcharea, onCommit: {
+                            let params: [String:Any] = [
+                                "userId":self.data.uID,
+                                "research":self.data.researcharea
+                            ]
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/faculty_research")!)
+                            request.httpMethod = "POST"
+                            request.httpBody = params.percentEncoded()
+                            httpPrepare(request: request, params: params, udata: self.data)
+                        })
+                    }
+                }
                 Section(header: Text("Add your interests")) {
-                    TextField("name new interest here", text: $interest)
+                    TextField("name new interest here", text: $interest, onCommit: {
+                        if(self.interest != "") {
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/interests")!)
+                            request.httpMethod = "POST"
+                            let params: [String:Any] = [
+                                "userId":self.data.uID,
+                                "activity":self.interest
+                            ]
+                            request.httpBody = params.percentEncoded()
+                            httpPrepare(request: request, params: params, udata: self.data)
+                            self.interest = ""
+                        }
+                    })
                 }
             }
-            Button(action: {
-                self.page = "home"
-                if(self.interest != "") {
-                    var request = URLRequest(url: URL(string: "http://localhost:5000/interests")!)
-                    request.httpMethod = "POST"
-                    let params: [String:Any] = [
-                        "userId":self.data.uID,
-                        "activity":self.interest
-                    ]
-                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                    httpPrepare(request: request, params: params, udata: self.data, display: UserSearchDisplay())
+            HStack {
+//                Button(action: {
+//    //                self.page = "home"
+////                    self.data.details.removeAll()
+//                }) {
+//                    Text("Add interest")
+//                }
+                Button(action: {self.page = "home"}) {
+                    Text("Back")
                 }
-            }) {
-                Text("Add interest")
+                Text(self.interest)
             }
         }
     }

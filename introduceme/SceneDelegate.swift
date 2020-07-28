@@ -72,9 +72,8 @@ class UserData: ObservableObject {
     @Published var location: String = ""
     @Published var age: String = ""
     @Published var major: String = ""
+    @Published var grad: String = ""
     @Published var researcharea: String = ""
-    @Published var undergrad: String = ""
-    @Published var management: String = ""
     @Published var details: [String] = []
 }
 
