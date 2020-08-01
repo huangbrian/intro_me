@@ -67,15 +67,29 @@ class UserData: ObservableObject {
     @Published var uID: Int = -1
     @Published var email: String = ""
     @Published var user: String = ""
-    @Published var pass: String = ""
+//    @Published var pass: String = ""
     @Published var occupation: String = ""
     @Published var location: String = ""
     @Published var age: String = ""
     @Published var major: String = ""
+    @Published var grad: String = ""
     @Published var researcharea: String = ""
-    @Published var undergrad: String = ""
-    @Published var management: String = ""
     @Published var details: [String] = []
+    @Published var page: String = ""
+    
+    func logout() {
+            uID = -1
+            email = ""
+            user = ""
+            occupation = ""
+            location = ""
+            age = ""
+            major = ""
+            grad = ""
+            researcharea = ""
+            details = []
+            page = ""
+    }
 }
 
 class UserSearchDisplay: ObservableObject {
