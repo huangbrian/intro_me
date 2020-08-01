@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flaskext.mysql import MySQL
+import bcrypt
 app = Flask(__name__)
 
 mysql = MySQL(app)
@@ -23,18 +24,65 @@ def main():
     res = cursor.fetchall()
     return jsonify(res)
 
+@app.route("/signin", methods=['POST'])
+def signin():
+    file = None
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''SELECT password,userId,username,occupation,email,location,age FROM User WHERE username=%s''',(file['user']))
+    rows = cursor.fetchall()
+    id = -1
+    for row in rows:
+        if row[0] == None or bcrypt.checkpw(str(file['pass']).encode('UTF-8'), row[0].encode('UTF-8')):
+            id = row[1]
+#            username = row[2]
+#            occupation = row[3]
+#            email = row[4]
+#            location = row[5]
+#            age = row[6]
+            addp = (row[0] == None)
+    if id != -1:
+        if row[3] == "Student":
+            cursor.execute('''SELECT major,is_undergraduate FROM Student WHERE userId=%s''',(id))
+            exinfo = cursor.fetchone()
+            return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],major=exinfo[0],is_ug=exinfo[1],addpass=addp)
+        elif row[3] == "Faculty":
+            cursor.execute('''SELECT research_area FROM Faculty WHERE userId=%s''',(id))
+            exinfo = cursor.fetchone()
+            return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],res_area=exinfo[0],addpass=addp)
+        return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6])
+    
+    return "authentication failed"
+
 @app.route("/addusr", methods=['POST'])
 def addusr():
     global curId
-    file = None;
+    file = None
     if request.method == "POST":
         file = request.form
-    cursor.execute('''INSERT INTO User(userId,username,email,occupation,location,age) VALUES(%s,%s,%s,%s,%s,%s);''',(curId,file['user'],file['email'],file['occupation'],file['location'],file['age']))
+    hash = bcrypt.hashpw(str(file['pass']).encode('UTF-8'), bcrypt.gensalt())
+    cursor.execute('''INSERT INTO User(userId,username,email,occupation,location,age,password) VALUES(%s,%s,%s,%s,%s,%s,%s);''',(curId,file['user'],file['email'],file['occupation'],file['location'],file['age'],hash))
     if file['occupation'] == 'Student' or file['occupation'] == 'Faculty':
         cursor.execute('''INSERT INTO %s(userId) VALUES(%s)''',(file['occupation'],curId))
     cursor.execute('''COMMIT;''')
     curId+=1
     return jsonify(id=curId-1)
+    
+@app.route("/updatepwd", methods=['POST'])
+def updatepwd():
+    file = None
+    if request.method == "POST":
+        file = request.form
+    print(file['pass'])
+    if file['pass'] != '':
+        hash = bcrypt.hashpw(file['pass'].encode('UTF-8'),bcrypt.gensalt())
+        cursor.execute('''UPDATE User SET password=%s WHERE userId=%s''',(hash,file['userId']))
+    else:
+        print('here')
+#        hash = 'NULL'
+        cursor.execute('''UPDATE User SET password=NULL WHERE userId=%s''',(file['userId']))
+#    cursor.execute('''UPDATE User SET password=%s WHERE userId=%s''',(hash,file['userId']))
+    return "updated password successfully"
 
 @app.route("/getinterests",methods=['POST'])
 def getinterests():
