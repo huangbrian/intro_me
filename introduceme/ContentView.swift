@@ -188,6 +188,10 @@ struct SignupView: View {
                             .foregroundColor(Color.red)
                     }
                     HStack {
+                        Button(action: {self.data.page = ""}) {
+                            Text("Already registered?")
+                        } .buttonStyle(GradientBackgroundStyle())
+                        
                         Button(action: {
                             if self.pass != self.passConfirm {
                                 self.pastogl = true
@@ -216,7 +220,7 @@ struct SignupView: View {
                         } .buttonStyle(GradientBackgroundStyle())
                     }
                 }
-                .padding(.horizontal, 80.0)
+                .padding(.horizontal, 30.0)
             }
             Spacer()
             Spacer()
@@ -232,10 +236,12 @@ struct UpdateView: View {
                 Button(action: {self.data.page = "updpass"}) {
                     Text("Update Password")
                 }
+                .padding(.all, 10)
                 Spacer()
                 Button(action: {self.data.page = "home"}) {
                     Text("Back to home")
                 }
+                .padding(.all, 10)
             }
             Spacer()
             Text("Update Account")
@@ -303,6 +309,7 @@ struct UpdateView: View {
             }) {
                 Text("Log out")
             }
+            .padding(.all, 10)
         }
     }
 }
@@ -312,6 +319,7 @@ struct PwdView: View {
     @State private var pass: String = ""
     @State private var passConfirm: String = ""
     @State private var updtogl: Bool = false
+    @State private var pastogl: Bool = false
     var body: some View {
         VStack {
             HStack {
@@ -319,35 +327,47 @@ struct PwdView: View {
                 Button(action: {self.data.page = "acctinfo"}) {
                     Text("Back to Account Info")
                 }
+                .padding(.all, 10)
             }
             Spacer()
-            Text("Update Account")
+            Text("Update Password")
                 .font(.title)
             Spacer()
             HStack {
                 VStack {
-                    TextField("New password", text: $pass)
+                    SecureField("New password", text: $pass)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.location)
-                    TextField("Confirm new password", text: $passConfirm)
+                    SecureField("Confirm new password", text: $passConfirm)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                    if pastogl {
+                        Text("passwords do not match")
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                    }
                     HStack {
                         Button(action: {
-                            var request = URLRequest(url: URL(string: "http://localhost:5000/updatepwd")!)
-                            request.httpMethod = "POST"
-                            let params: [String:Any] = [
-                                "pass":self.pass,
-                                "userId":self.data.uID
-                            ]
-                            request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                            httpPrepare(request: request, params: params, udata: self.data)
-                            self.updtogl = true
+                            if self.pass == self.passConfirm {
+                                var request = URLRequest(url: URL(string: "http://localhost:5000/updatepwd")!)
+                                request.httpMethod = "POST"
+                                let params: [String:Any] = [
+                                    "pass":self.pass,
+                                    "userId":self.data.uID
+                                ]
+                                request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                                httpPrepare(request: request, params: params, udata: self.data)
+                                self.updtogl = true
+                                self.pastogl = false
+                            } else {
+                                self.pastogl = true
+                            }
                         }) {
                             Text("Update Password")
                         } .buttonStyle(GradientBackgroundStyle())
                     }
                     if self.updtogl {
                         Text("Password updated")
+                            .padding(.vertical, 20)
                     }
                 }
                 .padding(.horizontal, 80.0)
@@ -368,10 +388,10 @@ struct HomeView: View {
                 Button(action: {self.data.page = "acctinfo"}) {
                     Text("Account Settings")
                 }
-                .padding(.horizontal, 10)
+                .padding(.all, 10)
                 Spacer()
                 Text("IntroMe")
-                    .font(.title).padding(.horizontal, 10)
+                    .font(.title).padding(.all, 10)
             }
             HStack {
                 Text("Find other users:")
@@ -416,6 +436,7 @@ struct HomeView: View {
             }) {
                 Text("Manage interests")
             }
+            .padding(.all, 10)
         }
     }
 }
@@ -514,7 +535,7 @@ struct InterestView: View {
                 Button(action: {self.data.page = "home"}) {
                     Text("Back")
                 }
-                Text(self.interest)
+                .padding(.all, 10)
             }
         }
     }
