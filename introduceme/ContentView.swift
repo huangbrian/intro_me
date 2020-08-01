@@ -279,7 +279,6 @@ struct UpdateView: View {
 //                            self.data.page = "home"
                         }) {
                             Text("Update Info")
-                               
                         } .buttonStyle(GradientBackgroundStyle())
                         Button(action: {
                             var request = URLRequest(url: URL(string: "http://localhost:5000/deleteuser")!)
@@ -395,7 +394,7 @@ struct HomeView: View {
             }
             HStack {
                 Text("Find other users:")
-                TextField("Search by name...", text: $search, onCommit: {
+                TextField("Search...", text: $search, onCommit: {
                     var request = URLRequest(url: URL(string: "http://localhost:5000/search")!)
                     request.httpMethod = "POST"
                     let params: [String:Any] = [
@@ -592,7 +591,8 @@ struct ContentView_Previews: PreviewProvider {
     @State static var blah: String = ""
     static var previews: some View {
 //        ContentView().environmentObject(UserData())
-        SignupView().environmentObject(UserData())
+//        SignupView().environmentObject(UserData())
+        HomeView().environmentObject(UserData())
 //        InterestView().environmentObject(UserData())
     }
 }

