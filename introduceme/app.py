@@ -64,7 +64,7 @@ def addusr():
     hash = bcrypt.hashpw(str(file['pass']).encode('UTF-8'), bcrypt.gensalt())
     cursor.execute('''INSERT INTO User(userId,username,email,occupation,location,age,password) VALUES(%s,%s,%s,%s,%s,%s,%s);''',(curId,file['user'],file['email'],file['occupation'],file['location'],file['age'],hash))
     if file['occupation'] == 'Student' or file['occupation'] == 'Faculty':
-        cursor.execute('''INSERT INTO %s(userId) VALUES(%s)''',(file['occupation'],curId))
+        cursor.execute('''INSERT INTO %s(userId) VALUES(%s)''',(file['occupation'].replace("'",""),curId))
     cursor.execute('''COMMIT;''')
     curId+=1
     return jsonify(id=curId-1)
