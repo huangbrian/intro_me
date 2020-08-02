@@ -131,7 +131,15 @@ def searchinfo():
     if request.method == "POST":
         file = request.form
     searchkey = '%' + file['key'] + '%'
-    cursor.execute('''SELECT u.userId,u.username,u.location FROM User u WHERE u.username LIKE %s OR u.location LIKE %s;''',(searchkey, searchkey))
+    query = '''SELECT DISTINCT * FROM (
+    SELECT userId, username, location FROM User WHERE username LIKE %s OR location LIKE %s
+    UNION
+    SELECT userId, username, location FROM User NATURAL JOIN Student WHERE major LIKE %s OR is_undergraduate LIKE %s
+    UNION
+    SELECT userId, username, location FROM User NATURAL JOIN Faculty WHERE research_area LIKE %s
+    UNION
+    SELECT u.userId AS userId, u.username AS username, u.location AS location FROM User u RIGHT JOIN Interested_In i ON u.userId = i.userId WHERE activityName LIKE %s) a;'''
+    cursor.execute(query, (searchkey,searchkey,searchkey,searchkey,searchkey,searchkey))
     res = cursor.fetchall()
     return jsonify(res)
 
