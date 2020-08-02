@@ -46,11 +46,19 @@ def signin():
         if row[3] == "Student":
             cursor.execute('''SELECT major,is_undergraduate FROM Student WHERE userId=%s''',(id))
             exinfo = cursor.fetchone()
-            return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],major=exinfo[0],is_ug=exinfo[1],addpass=addp)
+            maj = ""
+            isug = ""
+            if exinfo != None:
+                maj = exinfo[0]
+                isug = exinfo[1]
+            return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],major=maj,is_ug=isug,addpass=addp)
         elif row[3] == "Faculty":
             cursor.execute('''SELECT research_area FROM Faculty WHERE userId=%s''',(id))
             exinfo = cursor.fetchone()
-            return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],res_area=exinfo[0],addpass=addp)
+            resa = ""
+            if exinfo != None:
+                resa = exinfo[0]
+            return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],res_area=resa,addpass=addp)
         return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6])
     
     return "authentication failed"
@@ -63,8 +71,10 @@ def addusr():
         file = request.form
     hash = bcrypt.hashpw(str(file['pass']).encode('UTF-8'), bcrypt.gensalt())
     cursor.execute('''INSERT INTO User(userId,username,email,occupation,location,age,password) VALUES(%s,%s,%s,%s,%s,%s,%s);''',(curId,file['user'],file['email'],file['occupation'],file['location'],file['age'],hash))
-    if file['occupation'] == 'Student' or file['occupation'] == 'Faculty':
-        cursor.execute('''INSERT INTO %s(userId) VALUES(%s)''',(file['occupation'].replace("'",""),curId))
+    if file['occupation'] == 'Student':
+        cursor.execute('''INSERT INTO Student(userId) VALUES(%s)''',(curId))
+    elif file['occupation'] == 'Faculty':
+        cursor.execute('''INSERT INTO Faculty(userId) VALUES(%s)''',(curId))
     cursor.execute('''COMMIT;''')
     curId+=1
     return jsonify(id=curId-1)
