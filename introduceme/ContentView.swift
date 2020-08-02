@@ -60,8 +60,9 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                 for entry in array {
                     if let tup = entry as? [Any] {
                         if(tup.count>1) {
+                            print(tup)
                             display.ids.append(tup[0] as! Int)
-                            display.names.append((tup[1] as! String)+", "+(tup[2] as! String))
+                            display.names.append(namesAppend(tup: tup))
                         }
                     }
                 }
@@ -78,6 +79,19 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
     }
 
     task.resume()
+}
+
+func namesAppend(tup: [Any]) -> String {
+    var added = ""
+    for (index, _) in tup.enumerated() {
+        if index > 0 {
+            added += (tup[index] as? String ?? "No results")
+            if index < tup.count - 1 {
+                added += ", "
+            }
+        }
+    }
+    return added
 }
 
 struct ContentView: View {
@@ -386,6 +400,7 @@ struct PwdView: View {
 struct HomeView: View {
     @EnvironmentObject var data: UserData
     @State var search: String = ""
+    @State var match: String = ""
     @ObservedObject var display: UserSearchDisplay = UserSearchDisplay()
     var body: some View {
         VStack {
@@ -405,6 +420,23 @@ struct HomeView: View {
                     request.httpMethod = "POST"
                     let params: [String:Any] = [
                         "key":self.search
+                    ]
+                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                    httpPrepare(request: request, params: params, udata: self.data, display: self.display)
+                    print("here")
+                    print(self.display.names)
+                    print("here")
+                })
+            }
+            Spacer()
+            Spacer()
+            HStack {
+                Text("Match with other users:")
+                TextField("Match with...", text: $match, onCommit: {
+                    var request = URLRequest(url: URL(string: "http://localhost:5000/match")!)
+                    request.httpMethod = "POST"
+                    let params: [String:Any] = [
+                        "key":self.match
                     ]
                     request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                     httpPrepare(request: request, params: params, udata: self.data, display: self.display)
