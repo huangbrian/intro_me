@@ -423,11 +423,8 @@ struct HomeView: View {
                     ]
                     request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                     httpPrepare(request: request, params: params, udata: self.data, display: self.display)
-                    print("here")
-                    print(self.display.names)
-                    print("here")
                 })
-            }
+            }.padding(.all,10)
             Spacer()
             Spacer()
             HStack {
