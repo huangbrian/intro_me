@@ -489,7 +489,7 @@ struct InterestView: View {
                             request.httpBody = params.percentEncoded()
                             httpPrepare(request: request, params: params, udata: self.data)
                         })
-                        TextField("Undergrad or graduate?", text:$data.grad, onCommit: {
+                        TextField("Are you an undergrad?", text:$data.grad, onCommit: {
                             let params: [String:Any] = [
                                 "userId":self.data.uID,
                                 "is_ug":self.data.grad
