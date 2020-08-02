@@ -129,10 +129,18 @@ def searchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    searchkey = file['key'] + '%'
+    searchkey = '%' + file['key'] + '%'
     cursor.execute('''SELECT u.userId,u.username,u.location FROM User u WHERE u.username LIKE %s OR u.location LIKE %s;''',(searchkey, searchkey))
     res = cursor.fetchall()
-#    print(str(res))
+    return jsonify(res)
+
+@app.route("/match", methods=['POST'])
+def matchinfo():
+    file = None;
+    if request.method == "POST":
+        file = request.form
+    cursor.execute('''SELECT u.userId,u.username FROM User u WHERE u.username = %s;''',(file['key']))
+    res = cursor.fetchall()
     return jsonify(res)
 
 @app.route("/updateinfo", methods=['POST'])
@@ -143,6 +151,7 @@ def updateinfo():
     cursor.execute('''UPDATE User SET username=%s,email=%s,occupation=%s,location=%s,age=%s WHERE userId=%s ;''',(file['user'],file['email'],file['occupation'],file['location'],file['age'],file['userId']))
     cursor.execute('''COMMIT;''')
     return 'update successful'
+
     
 @app.route("/student_major", methods=['POST'])
 def student_major():
