@@ -120,7 +120,7 @@ def searchinfo():
     if request.method == "POST":
         file = request.form
     searchkey = file['key'] + '%'
-    cursor.execute('''SELECT u.userId,u.username,u.location FROM User u WHERE u.username LIKE %s OR u.location LIKE %s;''',(searchkey))
+    cursor.execute('''SELECT u.userId,u.username,u.location FROM User u WHERE u.username LIKE %s OR u.location LIKE %s;''',(searchkey, searchkey))
     res = cursor.fetchall()
 #    print(str(res))
     return jsonify(res)
