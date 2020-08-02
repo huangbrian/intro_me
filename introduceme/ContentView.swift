@@ -40,10 +40,16 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                     udata.age = res["age"] as! String
                     udata.email = res["email"] as! String
                     if udata.occupation == "Student" {
-                        udata.major = res["major"] as! String
-                        udata.grad = res["isug"] as! String
+                        if let maj = res["major"] as? String {
+                            udata.major = maj
+                        }
+                        if let isug = res["isug"] as? String {
+                            udata.grad = isug
+                        }
                     } else if udata.occupation == "Faculty" {
-                        udata.researcharea = res["res_area"] as! String
+                        if let resa = res["res_area"] as? String {
+                            udata.researcharea = resa
+                        }
                     }
                     udata.page = "home"
                 }
@@ -471,7 +477,7 @@ struct InterestView: View {
                     }
                 }
                 
-                if data.occupation == "Student" {
+                if data.occupation.trimmingCharacters(in: .whitespacesAndNewlines) == "Student" {
                     Section(header: Text("What's your major?")) {
                         TextField("Ex: marketing", text:$data.major, onCommit: {
                             let params: [String:Any] = [
@@ -494,7 +500,7 @@ struct InterestView: View {
                             httpPrepare(request: request, params: params, udata: self.data)
                         })
                     }
-                } else if data.occupation == "Faculty" {
+                } else if data.occupation.trimmingCharacters(in: .whitespacesAndNewlines) == "Faculty" {
                     Section(header: Text("What are you researching?")) {
                         TextField("Ex: Databases", text:$data.researcharea, onCommit: {
                             let params: [String:Any] = [
