@@ -436,7 +436,8 @@ struct HomeView: View {
                     var request = URLRequest(url: URL(string: "http://localhost:5000/match")!)
                     request.httpMethod = "POST"
                     let params: [String:Any] = [
-                        "key":self.match
+                        "key":self.match,
+                        "userId":self.data.uID
                     ]
                     request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                     httpPrepare(request: request, params: params, udata: self.data, display: self.display)

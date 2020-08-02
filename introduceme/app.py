@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flaskext.mysql import MySQL
 import bcrypt
+from dijkstar import Graph, find_path
 app = Flask(__name__)
 
 mysql = MySQL(app)
@@ -139,9 +140,28 @@ def matchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''SELECT u.userId,u.username FROM User u WHERE u.username = %s;''',(file['key']))
+    cursor.execute('''SELECT u.userId, u.username FROM User u WHERE u.username = %s;''',(file['key']))
     res = cursor.fetchall()
-    return jsonify(res)
+    return creategraph(res, file['userId'])
+    
+def creategraph(matchWith, currentUserId):
+    graph = Graph()
+    cursor.execute('''SELECT userId FROM User''')
+    try:
+        for id in cursor.fetchall():
+            for other_id in cursor.fetchall():
+                if id != other_id:
+                    cursor.execute('''SELECT activityName FROM Interested_In WHERE userId = id''')
+                    id_int = cursor.fetchall()
+                    cursor.execute('''SELECT activityName FROM Interested_In WHERE userId = other_id''')
+                    other_int = cursor.fetchall()
+                    for interest in id_int:
+                        for intother in other_in:
+                            if interest[0] == intother[0]:
+                                graph.add_edge(id[0], other_id[0], 1)
+        return jsonify(find_path(graph, currentUserId, matchWith[0]).edges)
+    except:
+        return jsonify(matchWith)
 
 @app.route("/updateinfo", methods=['POST'])
 def updateinfo():
