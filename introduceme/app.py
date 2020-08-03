@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flaskext.mysql import MySQL
 import bcrypt
 from dijkstar import Graph, find_path
+import re
 app = Flask(__name__)
 
 mysql = MySQL(app)
@@ -199,7 +200,7 @@ def student_ug():
     if file['is_ug'] == "Yes" or file['is_ug'] == "No":
         undergraduate = file['is_ug']
     else:
-        undergraduate = "Yes" if (file['is_ug'] == "Undergraduate" or file['is_ug'] == "undergraduate") else undergraduate = "No"
+        undergraduate = "Yes" if re.search("^under", file['is_ug'], flags=re.IGNORECASE) else "No"
     cursor.execute('''UPDATE Student SET is_undergraduate=%s WHERE userId=%s;''',(undergraduate,file['userId']))
     cursor.execute('''COMMIT;''')
     return 'undergrad/grad status updated successfully'
