@@ -199,7 +199,7 @@ def student_ug():
     undergraduate = ""
     if file['is_ug'] == "Yes":
         undergraduate = "Undergraduate"
-    else if file['is_ug'] == "No":
+    elif file['is_ug'] == "No":
         undergraduate = "Graduate"
     else:
         if re.search("^under", file['is_ug'], flags=re.IGNORECASE):
