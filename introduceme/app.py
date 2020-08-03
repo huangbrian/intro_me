@@ -200,7 +200,10 @@ def student_ug():
     if file['is_ug'] == "Yes" or file['is_ug'] == "No":
         undergraduate = file['is_ug']
     else:
-        undergraduate = "Yes" if re.search("^under", file['is_ug'], flags=re.IGNORECASE) else "No"
+        if re.search("^under", file['is_ug'], flags=re.IGNORECASE):
+            undergraduate = "Yes"
+        else:
+            undergraduate = "No"
     cursor.execute('''UPDATE Student SET is_undergraduate=%s WHERE userId=%s;''',(undergraduate,file['userId']))
     cursor.execute('''COMMIT;''')
     return 'undergrad/grad status updated successfully'
