@@ -43,7 +43,7 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                         if let maj = res["major"] as? String {
                             udata.major = maj
                         }
-                        if let isug = res["isug"] as? String {
+                        if let isug = res["is_ug"] as? String {
                             udata.grad = isug
                         }
                     } else if udata.occupation == "Faculty" {
@@ -130,7 +130,16 @@ struct Start: View {
                     TextField("Username", text: $data.user)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .textContentType(.username)
-                    SecureField("Password", text: $pass)
+                    SecureField("Password", text: $pass, onCommit: {
+                        var request = URLRequest(url: URL(string: "http://localhost:5000/signin")!)
+                        request.httpMethod = "POST"
+                        let params: [String:Any] = [
+                            "user":self.data.user,
+                            "pass":self.pass
+                        ]
+                        request.httpBody = params.percentEncoded()
+                        httpPrepare(request: request, params: params, udata: self.data)
+                    })
                         .textContentType(.password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     if self.data.uID == -2 {
@@ -483,7 +492,7 @@ struct InterestView: View {
     var body: some View {
         VStack {
             List {
-                Section(header: Text("Already interested in")) {
+                Section(header: Text("Intrests")) {
                     if data.details.count > 0 {
                         ForEach(Range(0...data.details.count-1),id: \.self) {n in
                             HStack {
@@ -519,7 +528,9 @@ struct InterestView: View {
                             request.httpBody = params.percentEncoded()
                             httpPrepare(request: request, params: params, udata: self.data)
                         })
-                        TextField("Are you an undergrad?", text:$data.grad, onCommit: {
+                    }
+                    Section(header: Text("Are you an undergrad?")) {
+                        TextField("", text:$data.grad, onCommit: {
                             let params: [String:Any] = [
                                 "userId":self.data.uID,
                                 "is_ug":self.data.grad
