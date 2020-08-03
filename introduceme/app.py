@@ -131,18 +131,20 @@ def searchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    searchkey = '%' + file['key'] + '%'
-    query = '''SELECT DISTINCT * FROM (
-    SELECT userId, username, location FROM User WHERE username LIKE %s OR location LIKE %s
-    UNION
-    SELECT userId, username, location FROM User NATURAL JOIN Student WHERE major LIKE %s OR is_undergraduate LIKE %s
-    UNION
-    SELECT userId, username, location FROM User NATURAL JOIN Faculty WHERE research_area LIKE %s
-    UNION
-    SELECT u.userId AS userId, u.username AS username, u.location AS location FROM User u RIGHT JOIN Interested_In i ON u.userId = i.userId WHERE activityName LIKE %s) a;'''
-    cursor.execute(query, (searchkey,searchkey,searchkey,searchkey,searchkey,searchkey))
-    res = cursor.fetchall()
-    return jsonify(res)
+    if searchkey != '':
+        searchkey = file['key'] + '%'
+        query = '''SELECT DISTINCT * FROM (
+        SELECT userId, username, location FROM User WHERE username LIKE %s OR location LIKE %s
+        UNION
+        SELECT userId, username, location FROM User NATURAL JOIN Student WHERE major LIKE %s OR is_undergraduate LIKE %s
+        UNION
+        SELECT userId, username, location FROM User NATURAL JOIN Faculty WHERE research_area LIKE %s
+        UNION
+        SELECT u.userId AS userId, u.username AS username, u.location AS location FROM User u RIGHT JOIN Interested_In i ON u.userId = i.userId WHERE activityName LIKE %s) a;'''
+        cursor.execute(query, (searchkey,searchkey,searchkey,searchkey,searchkey,searchkey))
+        res = cursor.fetchall()
+        return jsonify(res)
+    return 'nothing searched'
 
 @app.route("/match", methods=['POST'])
 def matchinfo():
@@ -199,7 +201,7 @@ def student_ug():
     undergraduate = ""
     if file['is_ug'] == "Yes":
         undergraduate = "Undergraduate"
-    else if file['is_ug'] == "No":
+    elif file['is_ug'] == "No":
         undergraduate = "Graduate"
     else:
         if re.search("^under", file['is_ug'], flags=re.IGNORECASE):
