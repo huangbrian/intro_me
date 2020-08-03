@@ -195,7 +195,12 @@ def student_ug():
     file = None
     if request.method == "POST":
         file = request.form
-    cursor.execute('''UPDATE Student SET is_undergraduate=%s WHERE userId=%s;''',(file['is_ug'],file['userId']))
+    undergraduate = ""
+    if file['is_ug'] == "Yes" or file['is_ug'] == "No":
+        undergraduate = file['is_ug']
+    else:
+        undergraduate = "Yes" if (file['is_ug'] == "Undergraduate" or file['is_ug'] == "undergraduate") else undergraduate = "No"
+    cursor.execute('''UPDATE Student SET is_undergraduate=%s WHERE userId=%s;''',(undergraduate,file['userId']))
     cursor.execute('''COMMIT;''')
     return 'undergrad/grad status updated successfully'
 
