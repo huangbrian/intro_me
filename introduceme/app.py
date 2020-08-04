@@ -14,9 +14,9 @@ app.config['MYSQL_DATABASE_DB'] = 'all_data'
 app.config['MYSQL_DATABASE_HOST'] = 'database-introduceme.cqq4na6tjpm6.us-east-2.rds.amazonaws.com'
 mysql.init_app(app)
 
-graph = Graph()
-graph_included = []
+graph = Graph(undirected=True)
 def creategraph():
+    graph = Graph(undirected=True)
     cursor.execute('''SELECT userId, occupation FROM User''')
     fetched = cursor.fetchall()
     cursor.execute('''SELECT userId, activityName, major FROM Interested_In NATURAL JOIN Student''')
@@ -37,7 +37,6 @@ def creategraph():
             facl_index[faculty[0]] = faculty[1:]
     try:
         for id in fetched:
-            graph_included.append(id)
             for other_id in fetched:
                 if id < other_id:
                     if str(id[1]) == "Student":
@@ -59,7 +58,6 @@ def creategraph():
                                 all_ints.append(interest)
                     if len(all_ints) > 0:
                         graph.add_edge(id[0], other_id[0], (1, all_ints))
-                        graph.add_edge(other_id[0], id[0], (1, all_ints))
         print("Graph creation successful.")
     except:
         traceback.print_exc()
@@ -118,9 +116,6 @@ def signin():
         return jsonify(id=row[1],username=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6])
     
     return "authentication failed"
-    
-def update_graph(currentUserId):
-    creategraph()
         
 @app.route("/addusr", methods=['POST'])
 def addusr():
@@ -135,7 +130,7 @@ def addusr():
     elif file['occupation'] == 'Faculty':
         cursor.execute('''INSERT INTO Faculty(userId) VALUES(%s)''',(curId))
     cursor.execute('''COMMIT;''')
-    update_graph(curId)
+    creategraph()
     curId+=1
     return jsonify(id=curId-1)
     
@@ -172,7 +167,7 @@ def interests():
     cursor.execute('''SELECT activityName FROM Interested_In WHERE userId=%s''',(file['userId']))
     res = cursor.fetchall()
     cursor.execute('''SELECT userId FROM User WHERE userId = %s''',(file['userId']))
-    update_graph(cursor.fetchall()[0][0])
+    creategraph()
     return jsonify(res)
     
 @app.route("/uninterested",methods=['POST'])
@@ -184,8 +179,6 @@ def uninterested():
     cursor.execute('''COMMIT;''')
     cursor.execute('''SELECT activityName FROM Interested_In WHERE userId=%s''',(file['userId']))
     res = cursor.fetchall()
-    graph = Graph()
-    graph_included = []
     creategraph()
     return jsonify(res)
 
@@ -238,8 +231,6 @@ def updateinfo():
         file = request.form
     cursor.execute('''UPDATE User SET username=%s,email=%s,occupation=%s,location=%s,age=%s WHERE userId=%s ;''',(file['user'],file['email'],file['occupation'],file['location'],file['age'],file['userId']))
     cursor.execute('''COMMIT;''')
-    graph = Graph()
-    graph_included = []
     creategraph()
     return 'update successful'
 
@@ -252,7 +243,7 @@ def student_major():
     cursor.execute('''UPDATE Student SET major=%s WHERE userId=%s;''',(file['major'],file['userId']))
     cursor.execute('''COMMIT;''')
     cursor.execute('''SELECT userId FROM User WHERE userId=%s''',file['userId'])
-    update_graph(cursor.fetchall()[0][0])
+    creategraph()
     return 'major updated successfully'
 
 @app.route("/student_ug", methods=['POST'])
@@ -273,7 +264,7 @@ def student_ug():
     cursor.execute('''UPDATE Student SET is_undergraduate=%s WHERE userId=%s;''',(undergraduate,file['userId']))
     cursor.execute('''COMMIT;''')
     cursor.execute('''SELECT userId FROM User WHERE userId=%s''',file['userId'])
-    update_graph(cursor.fetchall()[0][0])
+    creategraph()
     return 'undergrad/grad status updated successfully'
 
 @app.route("/faculty_research", methods=['POST'])
@@ -284,7 +275,7 @@ def faculty_research():
     cursor.execute('''UPDATE Faculty SET research_area=%s WHERE userId=%s;''',(file['research'],file['userId']))
     cursor.execute('''COMMIT;''')
     cursor.execute('''SELECT userId FROM User WHERE userId=%s''',file['userId'])
-    update_graph(cursor.fetchall()[0][0])
+    creategraph()
     return 'research area updated successfully'
 
 @app.route("/deleteuser", methods=['POST'])
@@ -296,8 +287,6 @@ def deleteinfo():
     cursor.execute('''DELETE FROM User WHERE userId=%s;''',(file['userId']))
     cursor.execute('''COMMIT;''')
     cursor.execute('''SELECT MAX(userId) FROM User;''')
-    graph = Graph()
-    graph_included = []
     creategraph()
     curId = 0
     for row in cursor.fetchall():
