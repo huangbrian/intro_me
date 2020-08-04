@@ -120,35 +120,7 @@ def signin():
     return "authentication failed"
     
 def update_graph(currentUserId):
-    cursor.execute('''SELECT occupation FROM User WHERE userId = %s''',(currentUserId))
-    occupation = str(cursor.fetchall()[0][0])
-    try:
-        for other in graph_included:
-            cursor.execute('''SELECT userId, occupation FROM User WHERE userId = %s''',(other[0]))
-            other_id = cursor.fetchall()[0]
-            if occupation == "Student":
-                cursor.execute('''SELECT activityName, major FROM Interested_In NATURAL JOIN Student WHERE userId = %s''',(currentUserId))
-            else:
-                cursor.execute('''SELECT activityName, research_area FROM Interested_In NATURAL JOIN Faculty WHERE userId = %s''',(currentUserId))
-            id_int = cursor.fetchall()
-            if str(other_id[1]) == "Student":
-                cursor.execute('''SELECT activityName, major FROM Interested_In NATURAL JOIN Student WHERE userId = %s''',(other_id[0]))
-            else:
-                cursor.execute('''SELECT activityName, research_area FROM Interested_In NATURAL JOIN Faculty WHERE userId = %s''',(other_id[0]))
-            other_int = cursor.fetchall()
-            all_ints = []
-            for interest in id_int:
-                for intother in other_int:
-                    for (index, element) in enumerate(interest):
-                        if interest[index] == intother[index]:
-                            all_ints.append(interest[index])
-            if len(all_ints) > 0:
-                graph.add_edge(currentUserId, other_id[0], (1, all_ints))
-                graph.add_edge(other_id[0], currentUserId, (1, all_ints))
-        graph_included.append(currentUserId)
-        print("Graph updated.")
-    except:
-        traceback.print_exc()
+    creategraph()
         
 @app.route("/addusr", methods=['POST'])
 def addusr():
