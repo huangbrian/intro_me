@@ -59,7 +59,7 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                 display.names.removeAll()
                 for entry in array {
                     if let tup = entry as? [Any] {
-                        if(tup.count>1) {
+                        if tup.count>1 && tup[0] as! Int != udata.uID {
                             print(tup)
                             display.ids.append(tup[0] as! Int)
                             display.names.append(namesAppend(tup: tup))
@@ -322,7 +322,7 @@ struct UpdateView: View {
                             ]
                             request.httpBody = params.percentEncoded()
                             httpPrepare(request: request, params: params, udata: self.data)
-                            self.data.page = ""
+                            self.data.logout()
                         }) {
                             Text("Delete Account")
                         } .buttonStyle(GradientBackgroundStyle())

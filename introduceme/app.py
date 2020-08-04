@@ -19,27 +19,44 @@ graph_included = []
 def creategraph():
     cursor.execute('''SELECT userId, occupation FROM User''')
     fetched = cursor.fetchall()
+    cursor.execute('''SELECT userId, activityName, major FROM Interested_In NATURAL JOIN Student''')
+    students = cursor.fetchall()
+    stud_index = {}
+    for student in students:
+        if stud_index.get(student[0]) != None:
+            stud_index[student[0]] += student[1:]
+        else:
+            stud_index[student[0]] = student[1:]
+    cursor.execute('''SELECT userId, activityName, research_area FROM Interested_In NATURAL JOIN Faculty''')
+    facultys = cursor.fetchall()
+    facl_index = {}
+    for faculty in facultys:
+        if facl_index.get(faculty[0]) != None:
+            facl_index[faculty[0]] += faculty[1:]
+        else:
+            facl_index[faculty[0]] = faculty[1:]
     try:
         for id in fetched:
             graph_included.append(id)
             for other_id in fetched:
                 if id < other_id:
                     if str(id[1]) == "Student":
-                        cursor.execute('''SELECT activityName, major FROM Interested_In NATURAL JOIN Student WHERE userId = %s''',(id[0]))
+                        id_int = stud_index[id[0]]
+                    elif str(id[1]) == "Faculty":
+                        id_int = facl_index[id[0]]
                     else:
-                        cursor.execute('''SELECT activityName, research_area FROM Interested_In NATURAL JOIN Faculty WHERE userId = %s''',(id[0]))
-                    id_int = cursor.fetchall()
+                        continue
                     if str(other_id[1]) == "Student":
-                        cursor.execute('''SELECT activityName, major FROM Interested_In NATURAL JOIN Student WHERE userId = %s''',(other_id[0]))
+                        other_int = stud_index[other_id[0]]
+                    elif str(other_id[1]) == "Faculty":
+                        other_int = facl_index[other_id[0]]
                     else:
-                        cursor.execute('''SELECT activityName, research_area FROM Interested_In NATURAL JOIN Faculty WHERE userId = %s''',(other_id[0]))
-                    other_int = cursor.fetchall()
+                        continue
                     all_ints = []
                     for interest in id_int:
                         for intother in other_int:
-                            for (index, element) in enumerate(interest):
-                                if interest[index] == intother[index]:
-                                    all_ints.append(interest[index])
+                            if interest == intother:
+                                all_ints.append(interest)
                     if len(all_ints) > 0:
                         graph.add_edge(id[0], other_id[0], (1, all_ints))
                         graph.add_edge(other_id[0], id[0], (1, all_ints))
@@ -205,7 +222,7 @@ def searchinfo():
     file = None;
     if request.method == "POST":
         file = request.form
-    if searchkey != '':
+    if file['key'] != '':
         searchkey = file['key'] + '%'
         query = '''SELECT DISTINCT * FROM (
         SELECT userId, username, location FROM User WHERE username LIKE %s OR location LIKE %s
