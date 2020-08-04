@@ -16,6 +16,7 @@ mysql.init_app(app)
 
 graph = Graph(undirected=True)
 def creategraph():
+    global graph
     graph = Graph(undirected=True)
     cursor.execute('''SELECT userId, occupation FROM User''')
     fetched = cursor.fetchall()
@@ -54,7 +55,7 @@ def creategraph():
                     all_ints = []
                     for interest in id_int:
                         for intother in other_int:
-                            if interest == intother:
+                            if interest == intother and interest is not None:
                                 all_ints.append(interest)
                     if len(all_ints) > 0:
                         graph.add_edge(id[0], other_id[0], (1, all_ints))
@@ -219,7 +220,7 @@ def cost_func(u, v, edge, prev_edge):
     
 def path_find(currentUserId, matchWith):
     try:
-        print(find_path(graph, currentUserId, matchWith[0][0], cost_func=cost_func))
+        path = find_path(graph, currentUserId, matchWith[0][0], cost_func=cost_func)
         return jsonify(matchWith)
     except:
         traceback.print_exc()
