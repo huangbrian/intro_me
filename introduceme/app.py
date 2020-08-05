@@ -41,15 +41,27 @@ def creategraph():
             for other_id in fetched:
                 if id < other_id:
                     if str(id[1]) == "Student":
-                        id_int = stud_index[id[0]]
+                        try:
+                            id_int = stud_index[id[0]]
+                        except:
+                            continue
                     elif str(id[1]) == "Faculty":
-                        id_int = facl_index[id[0]]
+                        try:
+                            id_int = facl_index[id[0]]
+                        except:
+                            continue
                     else:
                         continue
                     if str(other_id[1]) == "Student":
-                        other_int = stud_index[other_id[0]]
+                        try:
+                            other_int = stud_index[other_id[0]]
+                        except:
+                            continue
                     elif str(other_id[1]) == "Faculty":
-                        other_int = facl_index[other_id[0]]
+                        try:
+                            other_int = facl_index[other_id[0]]
+                        except:
+                            continue
                     else:
                         continue
                     all_ints = []
