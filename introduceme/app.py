@@ -58,7 +58,7 @@ def creategraph():
                             if interest == intother and interest is not None:
                                 all_ints.append(interest)
                     if len(all_ints) > 0:
-                        graph.add_edge(id[0], other_id[0], (1, all_ints))
+                        graph.add_edge(id[0], other_id[0], (1, list(set(all_ints))))
         print("Graph creation successful.")
     except:
         traceback.print_exc()
