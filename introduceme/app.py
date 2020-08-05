@@ -190,29 +190,83 @@ def searchinfo():
         file = request.form
     if file['key'] != '':
         searchkey = file['key'] + '%'
-        query = '''SELECT DISTINCT * FROM (
-        SELECT userId, username, location FROM User WHERE username LIKE %s OR location LIKE %s
-        UNION
-        SELECT userId, username, location FROM User NATURAL JOIN Student WHERE major LIKE %s OR is_undergraduate LIKE %s
-        UNION
-        SELECT userId, username, location FROM User NATURAL JOIN Faculty WHERE research_area LIKE %s
-        UNION
-        SELECT u.userId AS userId, u.username AS username, u.location AS location FROM User u RIGHT JOIN Interested_In i ON u.userId = i.userId WHERE activityName LIKE %s) a;'''
-        cursor.execute(query, (searchkey,searchkey,searchkey,searchkey,searchkey,searchkey))
+        query = ''''''
+        if file['cond'] == 'name':
+            query = '''
+            SELECT DISTINCT userId, username, location
+            FROM User
+            WHERE username LIKE %s'''
+            cursor.execute(query, (searchkey))
+        elif file['cond'] == 'location':
+            query = '''
+            SELECT DISTINCT userId, username, location
+            FROM User
+            WHERE location LIKE %s'''
+            cursor.execute(query, (searchkey))
+        elif file['cond'] == 'major':
+            query = '''
+            SELECT DISTINCT userId, username, location
+            FROM User NATURAL JOIN Student
+            WHERE major LIKE %s'''
+            cursor.execute(query, (searchkey))
+        elif file['cond'] == 'research area':
+            query = '''
+            SELECT DISTINCT userId, username, location
+            FROM User NATURAL JOIN Faculty
+            WHERE research_area LIKE %s'''
+            cursor.execute(query, (searchkey))
+        elif file['cond'] == 'interests':
+            query = '''
+            SELECT DISTINCT u.userId, u.username, u.location
+            FROM User u RIGHT JOIN Interested_In i ON u.userId = i.userId
+            WHERE activityName LIKE %s'''
+            cursor.execute(query, (searchkey))
+        else:
+            query = '''
+                SELECT DISTINCT * FROM (
+                SELECT userId, username, location FROM User WHERE username LIKE %s OR location LIKE %s
+                UNION
+                SELECT userId, username, location FROM User NATURAL JOIN Student WHERE major LIKE %s OR is_undergraduate LIKE %s
+                UNION
+                SELECT userId, username, location FROM User NATURAL JOIN Faculty WHERE research_area LIKE %s
+                UNION
+                SELECT u.userId AS userId, u.username AS username, u.location AS location FROM User u RIGHT JOIN Interested_In i ON u.userId = i.userId WHERE activityName LIKE %s) a;
+                '''
+            cursor.execute(query, (searchkey,searchkey,searchkey,searchkey,searchkey,searchkey))
         res = cursor.fetchall()
         return jsonify(res)
     return 'nothing searched'
 
 @app.route("/match", methods=['POST'])
-def matchinfo():
+def match():
     file = None;
     if request.method == "POST":
         file = request.form
-    cursor.execute('''SELECT u.userId, u.username FROM User u WHERE u.username = %s;''',(file['key']))
-    res = cursor.fetchall()
-    cursor.execute('''SELECT userId FROM User WHERE userId = %s''',(file['userId']))
-    id = cursor.fetchall()
-    return path_find(id[0][0], res)
+    try:
+        print(str(find_path(graph,int(file['my_id']),int(file['other_id']),cost_func=cost_func)))
+    except:
+        print("no path")
+    
+    cursor.execute('''SELECT password,userId,username,occupation,email,location,age FROM User WHERE userId=%s''',(file['other_id']))
+    rows = cursor.fetchall()
+    row = rows[0]
+    if row[3] == "Student":
+        cursor.execute('''SELECT major,is_undergraduate FROM Student WHERE userId=%s''',(file['other_id']))
+        exinfo = cursor.fetchone()
+        maj = ""
+        isug = ""
+        if exinfo != None:
+            maj = exinfo[0]
+            isug = exinfo[1]
+        return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],major=maj,is_ug=isug)
+    elif row[3] == "Faculty":
+        cursor.execute('''SELECT research_area FROM Faculty WHERE userId=%s''',(file['other_id']))
+        exinfo = cursor.fetchone()
+        resa = ""
+        if exinfo != None:
+            resa = exinfo[0]
+        return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],res_area=resa)
+    return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6])
     
 def cost_func(u, v, edge, prev_edge):
     length, name = edge
@@ -221,7 +275,7 @@ def cost_func(u, v, edge, prev_edge):
 def path_find(currentUserId, matchWith):
     try:
         path = find_path(graph, currentUserId, matchWith[0][0], cost_func=cost_func)
-        return jsonify(matchWith)
+        return jsonify(path)
     except:
         traceback.print_exc()
 
