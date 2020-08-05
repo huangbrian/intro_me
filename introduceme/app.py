@@ -58,7 +58,8 @@ def creategraph():
                             if interest == intother and interest is not None:
                                 all_ints.append(interest)
                     if len(all_ints) > 0:
-                        graph.add_edge(id[0], other_id[0], (1, list(set(all_ints))))
+                        weight = 1 / len(list(set(all_ints)))
+                        graph.add_edge(id[0], other_id[0], (weight, list(set(all_ints))))
         print("Graph creation successful.")
     except:
         traceback.print_exc()
@@ -242,10 +243,26 @@ def match():
     file = None;
     if request.method == "POST":
         file = request.form
+    dict={}
+    cursor.execute('''SELECT userId,username FROM User''')
+    for row in cursor.fetchall():
+        dict[row[0]]=row[1]
+    path = ""
     try:
-        print(str(find_path(graph,int(file['my_id']),int(file['other_id']),cost_func=cost_func)))
+        pathtupl = find_path(graph,int(file['my_id']),int(file['other_id']),cost_func=cost_func)
+        print(pathtupl.edges)
+        path = "You are connected with "
+        for i in range(1,len(pathtupl.nodes)):
+            print(i)
+            path += dict[pathtupl.nodes[i]] + " by sharing interest/major in "
+            for common in pathtupl.edges[i-1][1]:
+                path += common
+                if common != pathtupl.edges[i-1][1][-1]:
+                    path += " and "
+            if i != len(pathtupl.nodes)-1:
+                path += " who is connected with "
     except:
-        print("no path")
+        path = "You have no connections to this user."
     
     cursor.execute('''SELECT password,userId,username,occupation,email,location,age FROM User WHERE userId=%s''',(file['other_id']))
     rows = cursor.fetchall()
@@ -258,15 +275,15 @@ def match():
         if exinfo != None:
             maj = exinfo[0]
             isug = exinfo[1]
-        return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],major=maj,is_ug=isug)
+        return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],major=maj,is_ug=isug,path=path)
     elif row[3] == "Faculty":
         cursor.execute('''SELECT research_area FROM Faculty WHERE userId=%s''',(file['other_id']))
         exinfo = cursor.fetchone()
         resa = ""
         if exinfo != None:
             resa = exinfo[0]
-        return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],res_area=resa)
-    return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6])
+        return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],res_area=resa,path=path)
+    return jsonify(id=row[1],other_user=row[2],occupation=row[3],email=row[4],location=row[5],age=row[6],path=path)
     
 def cost_func(u, v, edge, prev_edge):
     length, name = edge

@@ -61,6 +61,7 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                     udata.details.append(res["location"] as! String)
                     udata.details.append(res["age"] as! String)
                     udata.details.append(res["email"] as! String)
+                    udata.details.append(res["path"] as! String)
                     if res["occupation"] as! String == "Student" {
                         if let maj = res["major"] as? String {
                             udata.details.append(maj)
@@ -87,7 +88,7 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                 for entry in array {
                     if let tup = entry as? [Any] {
                         if tup.count>1 && tup[0] as! Int != udata.uID {
-                            print(tup)
+//                            print(tup)
                             display.ids.append(tup[0] as! Int)
                             display.names.append(namesAppend(tup: tup))
                         }
@@ -614,16 +615,18 @@ struct OtherUserView: View {
                 Text("Age: "+self.data.details[3])
                 Divider()
                 Text("Email: "+self.data.details[4])
-                Spacer().frame(height:30)
+                Spacer().frame(height:40)
                 if self.data.details[1] == "Student" {
-                    Text("Major: "+self.data.details[5])
+                    Text("Major: "+self.data.details[6])
                     Divider()
-                    Text(self.data.details[6])
+                    Text(self.data.details[7])
+                } else if self.data.details[1] == "Faculty" {
+                    Text("Research area: "+self.data.details[6])
                 }
-                else if self.data.details[1] == "Faculty" {
-                    Text("Research area: "+self.data.details[5])
-                }
+                Spacer().frame(height:40)
             }
+            Text(self.data.details[5])
+            Spacer()
             Spacer()
             Spacer()
         }.padding(.horizontal,10)
