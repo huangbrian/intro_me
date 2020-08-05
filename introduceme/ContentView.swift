@@ -32,8 +32,8 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                 udata.uID = -2
             }
             if let res = json as? [String: Any] {
-                udata.uID = res["id"] as! Int
                 if let usr = res["username"] {
+                    udata.uID = res["id"] as! Int
                     udata.user = usr as! String
                     udata.occupation = res["occupation"] as! String
                     udata.location = res["location"] as! String
@@ -52,6 +52,33 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
                         }
                     }
                     udata.page = "home"
+                }
+                if let usr = res["other_user"] as? String{
+                    udata.page = "otheruser"
+                    udata.details.removeAll()
+                    udata.details.append(usr)
+                    udata.details.append(res["occupation"] as! String)
+                    udata.details.append(res["location"] as! String)
+                    udata.details.append(res["age"] as! String)
+                    udata.details.append(res["email"] as! String)
+                    if res["occupation"] as! String == "Student" {
+                        if let maj = res["major"] as? String {
+                            udata.details.append(maj)
+                        } else {
+                            udata.details.append("not listed")
+                        }
+                        if let isug = res["is_ug"] as? String {
+                            udata.details.append(isug)
+                        } else {
+                            udata.details.append("grad/undergrad status not listed")
+                        }
+                    } else if res["occupation"] as! String == "Faculty" {
+                        if let resa = res["res_area"] as? String {
+                            udata.details.append(resa)
+                        } else {
+                            udata.details.append("not listed")
+                        }
+                    }
                 }
             }
             if let array = json as? [Any] {
@@ -77,7 +104,6 @@ func httpPrepare(request: URLRequest, params: [String:Any], udata: UserData, dis
             }
         }
     }
-
     task.resume()
 }
 
@@ -86,7 +112,7 @@ func namesAppend(tup: [Any]) -> String {
     for (index, _) in tup.enumerated() {
         if index > 0 {
             added += (tup[index] as? String ?? "No results")
-            if index < tup.count - 1 {
+            if index < tup.count - 1 && (tup[index+1] as? String) != "" {
                 added += ", "
             }
         }
@@ -104,7 +130,9 @@ struct ContentView: View {
             SignupView()
         } else if(data.page == "home") {
             HomeView()
-        } else if(data.page == "acctinfo") {
+        } else if(data.page == "otheruser") {
+           OtherUserView()
+       } else if(data.page == "acctinfo") {
             UpdateView()
         } else if(data.page == "interests") {
             InterestView()
@@ -259,6 +287,7 @@ struct SignupView: View {
 
 struct UpdateView: View {
     @EnvironmentObject var data: UserData
+    @State var uptogl: Bool = false
     var body: some View {
         VStack {
             HStack {
@@ -305,7 +334,10 @@ struct UpdateView: View {
                             ]
                             request.httpBody = params.percentEncoded()
                             httpPrepare(request: request, params: params, udata: self.data)
-//                            self.data.page = "home"
+                            withAnimation(){self.uptogl = true}
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                withAnimation(){self.uptogl = false}
+                            }
                         }) {
                             Text("Update Info")
                         } .buttonStyle(GradientBackgroundStyle())
@@ -326,9 +358,12 @@ struct UpdateView: View {
                         }) {
                             Text("Delete Account")
                         } .buttonStyle(GradientBackgroundStyle())
+                    }.padding(.vertical, 10)
+                    if uptogl {
+                        Text("Information updated.").transition(.opacity)
                     }
                 }
-                .padding(.horizontal, 80.0)
+                .padding(.horizontal, 40.0)
             }
             Spacer()
             Spacer()
@@ -410,6 +445,8 @@ struct HomeView: View {
     @EnvironmentObject var data: UserData
     @State var search: String = ""
     @State var match: String = ""
+    @State var togl: Bool = false
+    @State var searchcond: String = "..."
     @ObservedObject var display: UserSearchDisplay = UserSearchDisplay()
     var body: some View {
         VStack {
@@ -423,43 +460,112 @@ struct HomeView: View {
                     .font(.title).padding(.all, 10)
             }
             HStack {
-                Text("Find other users:")
+                Button(action: {self.togl = !self.togl}) {
+                    HStack {
+                        Text("Find users by "+self.searchcond).foregroundColor(.black)
+                        Spacer().frame(width:10)
+                        Text("v").foregroundColor(.orange)
+                    }
+                }   .padding(.all,10)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.gray.opacity(0.2)))
                 TextField("Search...", text: $search, onCommit: {
                     var request = URLRequest(url: URL(string: "http://localhost:5000/search")!)
                     request.httpMethod = "POST"
                     let params: [String:Any] = [
-                        "key":self.search
+                        "key":self.search,
+                        "cond":self.searchcond
                     ]
                     request.httpBody = params.percentEncoded() // required before every httpPrepare() call
                     httpPrepare(request: request, params: params, udata: self.data, display: self.display)
                 })
-            }.padding(.all,10)
+            }.padding(.horizontal,10)
+            VStack(alignment: .leading) {
+                if togl {
+                    Group {
+                    Divider()
+                    Button(action: {self.searchcond = "name"
+                        self.togl = false
+                    }) {
+                        HStack {
+                            Text("name").foregroundColor(.black)
+                            Spacer()
+                        }
+                    }
+                    }
+                    Divider()
+                    Button(action: {self.searchcond = "major"
+                        self.togl = false
+                    }) {
+                        HStack {
+                            Text("major").foregroundColor(.black)
+                            Spacer()
+                        }
+                    }
+                    Divider()
+                    Button(action: {self.searchcond = "location"
+                        self.togl = false
+                    }) {
+                        HStack {
+                            Text("location").foregroundColor(.black)
+                            Spacer()
+                        }
+                    }
+                    Divider()
+                    Button(action: {self.searchcond = "research area"
+                        self.togl = false
+                    }) {
+                        HStack {
+                            Text("research area").foregroundColor(.black)
+                            Spacer()
+                        }
+                    }
+                    Divider()
+                    Button(action: {self.searchcond = "interests"
+                        self.togl = false
+                    }) {
+                        HStack {
+                            Text("interests").foregroundColor(.black)
+                            Spacer()
+                        }
+                    }
+                    Divider()
+                }
+            }.padding(.horizontal,10).background(RoundedRectangle(cornerRadius: 8).fill(Color.gray.opacity(0.2)))
             Spacer()
             Spacer()
-            HStack {
-                Text("Match with other users:")
-                TextField("Match with...", text: $match, onCommit: {
-                    var request = URLRequest(url: URL(string: "http://localhost:5000/match")!)
-                    request.httpMethod = "POST"
-                    let params: [String:Any] = [
-                        "key":self.match,
-                        "userId":self.data.uID
-                    ]
-                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
-                    httpPrepare(request: request, params: params, udata: self.data, display: self.display)
-                    print("here")
-                    print(self.display.names)
-                    print("here")
-                })
-//                    .textFieldStyle(BottomLineTextFieldStyle())
-            }.padding(.horizontal, 10)
+//            HStack {
+//                Text("Match with other users:")
+//                TextField("Match with...", text: $match, onCommit: {
+//                    var request = URLRequest(url: URL(string: "http://localhost:5000/match")!)
+//                    request.httpMethod = "POST"
+//                    let params: [String:Any] = [
+//                        "key":self.match,
+//                        "userId":self.data.uID
+//                    ]
+//                    request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+//                    httpPrepare(request: request, params: params, udata: self.data, display: self.display)
+//                    print("here")
+//                    print(self.display.names)
+//                    print("here")
+//                })
+////                    .textFieldStyle(BottomLineTextFieldStyle())
+//            }.padding(.horizontal, 10)
             Divider()
                 .frame(height: 1)
                 .padding(.horizontal, 10)
             List {
                 if self.display.names.count > 0 {
                     ForEach(Range(0...self.display.names.count-1),id:\.self) {i in
-                        Button(action: {}) {
+                        Button(action: {
+                            var request = URLRequest(url: URL(string: "http://localhost:5000/match")!)
+                            request.httpMethod = "POST"
+                            let params: [String:Any] = [
+                                "my_id":self.data.uID,
+                                "other_id":self.display.ids[i]
+                            ]
+                            request.httpBody = params.percentEncoded() // required before every httpPrepare() call
+                            httpPrepare(request: request, params: params, udata: self.data)
+                        }) {
                             Text(self.display.names[i])
                         }
                     }
@@ -482,6 +588,45 @@ struct HomeView: View {
             }
             .padding(.all, 10)
         }
+    }
+}
+
+struct OtherUserView: View {
+    @EnvironmentObject var data: UserData
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Button(action: {self.data.page="home"}) {
+                    Text("Back to home")
+                }
+                Spacer()
+            }
+            Spacer()
+            Text("User: "+self.data.details[0]).font(.title)
+            Spacer()
+            Group {
+                HStack {
+                    Text("Occupation: "+self.data.details[1])
+                }
+                Divider()
+                Text("Location: "+self.data.details[2])
+                Divider()
+                Text("Age: "+self.data.details[3])
+                Divider()
+                Text("Email: "+self.data.details[4])
+                Spacer().frame(height:30)
+                if self.data.details[1] == "Student" {
+                    Text("Major: "+self.data.details[5])
+                    Divider()
+                    Text(self.data.details[6])
+                }
+                else if self.data.details[1] == "Faculty" {
+                    Text("Research area: "+self.data.details[5])
+                }
+            }
+            Spacer()
+            Spacer()
+        }.padding(.horizontal,10)
     }
 }
 
@@ -639,7 +784,8 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
 //        ContentView().environmentObject(UserData())
 //        SignupView().environmentObject(UserData())
-        HomeView().environmentObject(UserData())
+//        HomeView().environmentObject(UserData())
+        OtherUserView().environmentObject(UserData())
 //        InterestView().environmentObject(UserData())
     }
 }
